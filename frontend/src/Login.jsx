@@ -49,8 +49,8 @@ export default function Login() {
     <div className="container">
       <Logo />
       <div id="loginForm" className="form active">
-        <h2>Login</h2>
-        <p className="subtitle">Please enter your account details</p>
+        
+        
         <form onSubmit={handleLoginSubmit}>
           <div className="form-group">
             <label htmlFor="loginEmail">Email</label>
