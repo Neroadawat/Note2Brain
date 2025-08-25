@@ -60,3 +60,14 @@ input[type="email"]:focus, input[type="password"]:focus {
     text-decoration: none;
     font-weight: 600;
 }
+
+/* เพิ่มใน Register.css */
+.container {
+    background: white;
+    border-radius: 25px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+}

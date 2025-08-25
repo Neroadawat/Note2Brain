@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./Login.css";
-import Register from "./Register";
+import { useNavigate } from "react-router-dom";
 
 function Logo() {
   return (
@@ -32,9 +32,9 @@ function Logo() {
 }
 
 export default function Login() {
-  const [showLogin, setShowLogin] = useState(true);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -48,46 +48,42 @@ export default function Login() {
   return (
     <div className="container">
       <Logo />
-      {showLogin ? (
-        <div id="loginForm" className="form active">
-          <h2>Login</h2>
-          <p className="subtitle">Please enter your account details</p>
-          <form onSubmit={handleLoginSubmit}>
-            <div className="form-group">
-              <label htmlFor="loginEmail">Email</label>
-              <input
-                type="email"
-                id="loginEmail"
-                name="email"
-                required
-                value={loginEmail}
-                onChange={(e) => setLoginEmail(e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="loginPassword">Password</label>
-              <input
-                type="password"
-                id="loginPassword"
-                name="password"
-                required
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
-              />
-            </div>
-            <div className="forgot-password">
-              <a href="#" onClick={e => {e.preventDefault(); showForgotPassword();}}>Forgot Password?</a>
-            </div>
-            <button type="submit" className="btn">Sign In</button>
-          </form>
-          <div className="switch-form">
-            Don't have an account?{" "}
-            <a href="#" onClick={e => {e.preventDefault(); setShowLogin(false);}}>Sign Up</a>
+      <div id="loginForm" className="form active">
+        <h2>Login</h2>
+        <p className="subtitle">Please enter your account details</p>
+        <form onSubmit={handleLoginSubmit}>
+          <div className="form-group">
+            <label htmlFor="loginEmail">Email</label>
+            <input
+              type="email"
+              id="loginEmail"
+              name="email"
+              required
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+            />
           </div>
+          <div className="form-group">
+            <label htmlFor="loginPassword">Password</label>
+            <input
+              type="password"
+              id="loginPassword"
+              name="password"
+              required
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
+          </div>
+          <div className="forgot-password">
+            <a href="#" onClick={e => {e.preventDefault(); showForgotPassword();}}>Forgot Password?</a>
+          </div>
+          <button type="submit" className="btn">Sign In</button>
+        </form>
+        <div className="switch-form">
+          Don't have an account?{" "}
+          <a href="#" onClick={e => {e.preventDefault(); navigate("/register");}}>Sign Up</a>
         </div>
-      ) : (
-        <Register onBackToLogin={() => setShowLogin(true)} />
-      )}
+      </div>
     </div>
   );
 }
