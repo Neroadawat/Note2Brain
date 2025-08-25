@@ -1,0 +1,62 @@
+.form.active {
+    display: block;
+}
+
+.form:not(.active) {
+    display: none;
+}
+
+/* สามารถคัดลอก style จาก Login.css มาใช้ร่วมกันได้ */
+.form-group {
+    margin-bottom: 20px;
+}
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+}
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+input[type="email"]:focus, input[type="password"]:focus {
+    outline: none;
+    border-color: #104880;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(16, 72, 128, 0.1);
+}
+.btn {
+    width: 100%;
+    padding: 14px;
+    background: #104880;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+}
+.btn:hover {
+    background: #0d3d6b;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 72, 128, 0.3);
+}
+.already-account {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+    font-size: 14px;
+}
+.already-account a {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
+}
