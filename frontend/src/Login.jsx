@@ -36,9 +36,27 @@ export default function Login() {
   const [loginPassword, setLoginPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    alert("Login successful!");
+    try {
+      const res = await fetch("http://127.0.0.1:8080/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: loginEmail,
+          password: loginPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Login successful!");
+        // สามารถ navigate ไปหน้าอื่นได้ เช่น navigate("/dashboard");
+      } else {
+        alert(data.detail || "Login failed");
+      }
+    } catch (err) {
+      alert("Network error");
+    }
   };
 
   const showForgotPassword = () => {
@@ -49,8 +67,6 @@ export default function Login() {
     <div className="container">
       <Logo />
       <div id="loginForm" className="form active">
-        
-        
         <form onSubmit={handleLoginSubmit}>
           <div className="form-group">
             <label htmlFor="loginEmail">Email</label>

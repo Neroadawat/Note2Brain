@@ -1,6 +1,6 @@
 generator client {
   provider             = "prisma-client-py"
-  interface           = "sync"
+  interface           = "asyncio"
   recursive_type_depth = 5
 }
 
@@ -12,7 +12,6 @@ datasource db {
 model User {
   id             Int      @id @default(autoincrement())
   email          String   @unique
-  username       String   @unique
   hashedPassword String
   isActive       Boolean  @default(true)
   createdAt      DateTime @default(now())

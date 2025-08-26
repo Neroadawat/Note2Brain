@@ -1,75 +1,51 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from pydantic import BaseModel, EmailStr
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from db import get_prisma
-import crud
-import uvicorn
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    username: str
-    password: str
+import bcrypt
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
-
-# CORS middleware setup
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-@app.post("/register", status_code=status.HTTP_201_CREATED)
-async def register(user: UserCreate):
-    async with get_prisma() as prisma:
-        try:
-            existing_email = await crud.get_user_by_email(prisma, user.email)
-            if existing_email:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Email already registered"
-                )
-            
-            existing_username = await crud.get_user_by_username(prisma, user.username)
-            if existing_username:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Username already taken"
-                )
-            
-            new_user = await crud.create_user(prisma, user.email, user.username, user.password)
-            return {"message": "User created successfully", "user_id": new_user.id}
-        except HTTPException as he:
-            raise he
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=str(e)
-            )
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+    confirm_password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+@app.post("/register")
+async def register(data: RegisterRequest):
+    if data.password != data.confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match")
+    prisma = await get_prisma()
+    user = await prisma.user.find_unique(where={"email": data.email})
+    if user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    hashed = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
+    user = await prisma.user.create(
+        data={
+            "email": data.email,
+            "hashedPassword": hashed,
+        }
+    )
+    return {"message": "User created", "user_id": user.id}
 
 @app.post("/login")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    async with get_prisma() as prisma:
-        try:
-            user = await crud.get_user_by_username(prisma, form_data.username)
-            if not user or not crud.verify_password(form_data.password, user.hashedPassword):
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Incorrect username or password"
-                )
-            return {"message": "Login successful", "user_id": user.id}
-        except HTTPException as he:
-            raise he
-        except Exception as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=str(e)
-            )
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+async def login(data: LoginRequest):
+    prisma = await get_prisma()
+    user = await prisma.user.find_unique(where={"email": data.email})
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    if not bcrypt.checkpw(data.password.encode(), user.hashedPassword.encode()):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
+    return {"message": "Login successful", "user_id": user.id}

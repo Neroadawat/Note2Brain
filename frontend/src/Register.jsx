@@ -8,13 +8,32 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     if (registerPassword !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    alert("Registration successful!");
+    try {
+      const res = await fetch("http://127.0.0.1:8080/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: registerEmail,
+          password: registerPassword,
+          confirm_password: confirmPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Registration successful!");
+        navigate("/login");
+      } else {
+        alert(data.detail || "Registration failed");
+      }
+    } catch (err) {
+      alert("Network error");
+    }
   };
 
   return (
