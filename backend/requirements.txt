@@ -3,3 +3,5 @@ uvicorn
 python-multipart
 requests
 openai
+bcrypt
+PyPDF2
