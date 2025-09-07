@@ -22,6 +22,7 @@ export default function Login() {
       if (res.ok) {
         localStorage.setItem('userId', data.user_id.toString());
         alert("Login successful!");
+        navigate("/upload")
         // สามารถ navigate ไปหน้าอื่นได้ เช่น navigate("/dashboard");
       } else {
         alert(data.detail || "Login failed");

@@ -1,7 +1,7 @@
 generator client {
   provider             = "prisma-client-py"
-  interface           = "asyncio"
-  recursive_type_depth = 5
+  interface            = "asyncio"
+  recursive_type_depth = "5"
 }
 
 datasource db {
@@ -10,62 +10,62 @@ datasource db {
 }
 
 model User {
-  id             Int       @id @default(autoincrement())
-  email          String    @unique
+  id             Int           @id @default(autoincrement())
+  email          String        @unique
   hashedPassword String
+  isActive       Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   name           String?
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  quizzes        Quiz[]
   documents      Document[]
+  quizzes        Quiz[]
   quizAttempts   QuizAttempt[]
 }
- 
+
 model Document {
-  id         String   @id @default(uuid())
-  owner      User     @relation(fields: [ownerId], references: [id])
-  ownerId    Int
-  filename   String
-  fullText   String
-  summary    String
-  quizzes    Quiz[]
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  ownerId   Int
+  filename  String
+  fullText  String
+  summary   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User     @relation(fields: [ownerId], references: [id])
+  quizzes   Quiz[]
 }
- 
+
 model Quiz {
-  id          String        @id @default(uuid())
-  user        User          @relation(fields: [userId], references: [id])
-  userId      Int
-  document    Document      @relation(fields: [documentId], references: [id])
-  documentId  String
-  difficulty  String        // "easy", "medium", "hard"
-  questions   Question[]
-  attempts    QuizAttempt[]
-  createdAt   DateTime      @default(now())
+  id         String        @id @default(uuid())
+  userId     Int
+  documentId String
+  difficulty String
+  createdAt  DateTime      @default(now())
+  questions  Question[]
+  document   Document      @relation(fields: [documentId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+  attempts   QuizAttempt[]
 }
- 
+
 model Question {
-  id            String   @id @default(uuid())
-  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  id            String  @id @default(uuid())
   quizId        String
   question      String
   optionA       String
   optionB       String
   optionC       String
   optionD       String
-  correctAnswer String   // "A", "B", "C", "D"
-  explanation   String?  // correct explanation
+  correctAnswer String
+  explanation   String?
+  quiz          Quiz    @relation(fields: [quizId], references: [id], onDelete: Cascade)
 }
- 
+
 model QuizAttempt {
-  id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
-  userId      Int
-  quiz        Quiz     @relation(fields: [quizId], references: [id])
-  quizId      String
-  score       Int
+  id             String   @id @default(uuid())
+  userId         Int
+  quizId         String
+  score          Int
   totalQuestions Int
-  completedAt DateTime @default(now())
+  completedAt    DateTime @default(now())
+  quiz           Quiz     @relation(fields: [quizId], references: [id])
+  user           User     @relation(fields: [userId], references: [id])
 }
