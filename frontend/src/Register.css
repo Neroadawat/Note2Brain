@@ -71,3 +71,142 @@ input[type="email"]:focus, input[type="password"]:focus {
     max-width: 400px;
     position: relative;
 }
+
+.register-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #104880 100%, #1e5a8a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.register-container {
+    background: white;
+    border-radius: 40px;
+    display: flex;
+    width: 1000px;
+    max-width: 95%;
+    overflow: hidden;
+}
+
+.register-content {
+    flex: 1;
+    padding: 50px;
+}
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.subtitle {
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+.password-rules {
+    margin: 20px 0;
+}
+
+.rule {
+    color: #666;
+    margin-bottom: 5px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.rule.valid {
+    color: #22c55e;
+}
+
+.error-message {
+    color: #dc2626;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.continue-btn {
+    width: 100%;
+    padding: 15px;
+    background: white;
+    color: #104880;
+    border: 2px solid #104880;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+    background: #104880;
+    color: white;
+}
+
+.continue-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.login-link a {
+    color: #104880;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.register-image {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.register-image img {
+    width: 300px;  /* กำหนดความกว้างที่แน่นอน */
+    height: auto;   /* ให้ความสูงปรับตามอัตราส่วน */
+    object-fit: contain; /* รักษาอัตราส่วนของรูปภาพ */
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        flex-direction: column;
+    }
+    
+    .register-image {
+        display: none;
+    }
+}

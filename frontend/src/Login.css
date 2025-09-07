@@ -6,7 +6,7 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #104880 0%, #1e5a8a 100%);
+    background: linear-gradient(135deg, #104880 100%, #1e5a8a 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -51,6 +51,12 @@ body {
     font-size: 28px;
     font-weight: bold;
     color: #104880;
+}
+
+h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+    color: #333;
 }
 
 h2 {
@@ -113,18 +119,56 @@ input[type="email"]:focus, input[type="password"]:focus {
     box-shadow: 0 8px 25px rgba(16, 72, 128, 0.3);
 }
 
+.continue-btn {
+    width: 50%;
+    padding: 15px;
+    background: white;
+    color: #104880;
+    border: 2px solid #104880;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    margin: 20px auto;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.continue-btn:hover {
+    background: #104880;
+    color: white;
+    transform: translateY(-2px);
+}
+
 .forgot-password {
     text-align: right;
-    margin: -15px 0 20px 0;
+    margin: -10px 0 20px;
 }
 
 .forgot-password a {
-    color: #2563eb;
+    color: #104880;
     text-decoration: none;
     font-size: 14px;
+    transition: all 0.2s ease;
 }
 
 .forgot-password a:hover {
+    text-decoration: underline;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #666;
+}
+
+.register-link a {
+    color: #104880;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.register-link a:hover {
     text-decoration: underline;
 }
 
@@ -172,4 +216,58 @@ input[type="email"]:focus, input[type="password"]:focus {
     color: #2563eb;
     text-decoration: none;
     font-weight: 600;
+}
+
+/* Login page layout */
+.login-page {
+    min-height: 100vh;
+    background: #104880;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+    background: white;
+    border-radius: 60px;
+    display: flex;
+    width: 1000px;
+    max-width: 95%;
+    overflow: hidden;
+}
+
+.login-content {
+    flex: 1;
+    padding: 50px;
+}
+
+.login-image {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+.login-image img {
+    width: 300px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+    
+    .login-image {
+        display: none;
+    }
+    
+    .login-content {
+        padding: 40px 20px;
+    }
 }
