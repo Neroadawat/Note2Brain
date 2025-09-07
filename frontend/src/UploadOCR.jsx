@@ -19,34 +19,39 @@ export default function UploadOCR() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!file) return;
+  e.preventDefault();
+  if (!file) return;
 
-    setLoading(true);
-    setError(null);
-    setResult(null);
+  setLoading(true);
+  setError(null);
+  setResult(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
+  const formData = new FormData();
+  formData.append('file', file);
 
-    try {
-      const response = await fetch('http://localhost:8000/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('OCR process failed');
-      }
-
-      const data = await response.json();
-      setResult(data);
-    } catch (err) {
-      setError(err.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
+  try {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      throw new Error("User not logged in");
     }
-  };
+
+    const response = await fetch(`http://localhost:8000/upload?user_id=${userId}`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error('OCR process failed');
+    }
+
+    const data = await response.json();
+    setResult(data);
+  } catch (err) {
+    setError(err.message || 'Something went wrong');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="upload-container">

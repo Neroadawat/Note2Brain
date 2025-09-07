@@ -1,12 +1,16 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
 from PyPDF2 import PdfReader
 import tempfile
 import io
+from db import get_prisma
+from quiz import router as quiz_router
 
 app = FastAPI()
+
+app.include_router(quiz_router)
 
 # Add CORS middleware
 app.add_middleware(
@@ -94,7 +98,11 @@ def typhoon_summary(text: str):
 
 
 @app.post("/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(
+    file: UploadFile = File(...),
+    user_id: int = Query(...),  # เพิ่ม user_id parameter
+    prisma = Depends(get_prisma)  # เพิ่ม prisma dependency
+):
     # 1. OCR
     ocr_text = typhoon_ocr(file)
     if not ocr_text:
@@ -103,6 +111,15 @@ async def upload_file(file: UploadFile = File(...)):
     # 2. Summarize
     summary = typhoon_summary(ocr_text)
 
+    # 3. Save to database (เพิ่มใหม่)
+    document = await prisma.document.create(
+        data={
+            "filename": file.filename,
+            "fullText": ocr_text,
+            "summary": summary,
+            "ownerId": user_id
+        }
+    )
     return {
         "filename": file.filename,
         "ocr_text": ocr_text,

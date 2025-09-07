@@ -49,6 +49,7 @@ export default function Login() {
       });
       const data = await res.json();
       if (res.ok) {
+        localStorage.setItem('userId', data.user_id.toString());
         alert("Login successful!");
         // สามารถ navigate ไปหน้าอื่นได้ เช่น navigate("/dashboard");
       } else {

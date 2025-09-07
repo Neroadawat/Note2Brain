@@ -10,10 +10,62 @@ datasource db {
 }
 
 model User {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique
+  id             Int       @id @default(autoincrement())
+  email          String    @unique
   hashedPassword String
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  name           String?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  quizzes        Quiz[]
+  documents      Document[]
+  quizAttempts   QuizAttempt[]
+}
+ 
+model Document {
+  id         String   @id @default(uuid())
+  owner      User     @relation(fields: [ownerId], references: [id])
+  ownerId    Int
+  filename   String
+  fullText   String
+  summary    String
+  quizzes    Quiz[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+ 
+model Quiz {
+  id          String        @id @default(uuid())
+  user        User          @relation(fields: [userId], references: [id])
+  userId      Int
+  document    Document      @relation(fields: [documentId], references: [id])
+  documentId  String
+  difficulty  String        // "easy", "medium", "hard"
+  questions   Question[]
+  attempts    QuizAttempt[]
+  createdAt   DateTime      @default(now())
+}
+ 
+model Question {
+  id            String   @id @default(uuid())
+  quiz          Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+  question      String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String   // "A", "B", "C", "D"
+  explanation   String?  // correct explanation
+}
+ 
+model QuizAttempt {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      Int
+  quiz        Quiz     @relation(fields: [quizId], references: [id])
+  quizId      String
+  score       Int
+  totalQuestions Int
+  completedAt DateTime @default(now())
 }

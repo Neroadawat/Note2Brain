@@ -4,7 +4,10 @@ from db import get_prisma
 import bcrypt
 from fastapi.middleware.cors import CORSMiddleware
 
+
 app = FastAPI()
+
+
 
 app.add_middleware(
     CORSMiddleware,
