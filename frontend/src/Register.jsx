@@ -1,30 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Register.css";
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordValidation, setPasswordValidation] = useState({
+    length: false,
+    number: false,
+    uppercase: false,
+  });
+  const [passwordMatch, setPasswordMatch] = useState(true);
   const navigate = useNavigate();
 
-  const handleRegisterSubmit = async (e) => {
+  useEffect(() => {
+    setPasswordValidation({
+      length: password.length >= 8,
+      number: /[0-9]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+    });
+  }, [password]);
+
+  useEffect(() => {
+    if (confirmPassword) {
+      setPasswordMatch(password === confirmPassword);
+    }
+  }, [password, confirmPassword]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (registerPassword !== confirmPassword) {
-      alert("Passwords do not match!");
+    if (!Object.values(passwordValidation).every(Boolean) || !passwordMatch) {
       return;
     }
+
     try {
       const res = await fetch("http://127.0.0.1:8080/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: registerEmail,
-          password: registerPassword,
-          confirm_password: confirmPassword,
+          email: email,
+          password: password,
+          confirm_password: confirmPassword
         }),
       });
+
       const data = await res.json();
+      
       if (res.ok) {
         alert("Registration successful!");
         navigate("/login");
@@ -33,53 +55,79 @@ export default function Register() {
       }
     } catch (err) {
       alert("Network error");
+      console.error(err);
     }
   };
 
   return (
-    <div className="container">
-      <div id="registerForm" className="form active">
-        <h2>Getting Started</h2>
-        <p className="subtitle">Seems you are new here.Let's get set up your profile.</p>
-        <form onSubmit={handleRegisterSubmit}>
-          <div className="form-group">
-            <label htmlFor="registerEmail">Email Address</label>
-            <input
-              type="email"
-              id="registerEmail"
-              name="email"
-              required
-              value={registerEmail}
-              onChange={(e) => setRegisterEmail(e.target.value)}
-            />
+    <div className="register-page">
+      <div className="register-container">
+        <div className="register-content">
+          <h1>Getting Started</h1>
+          <p className="subtitle">Seems you are new here.Let's set up your profile.</p>
+
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
+              {!passwordMatch && confirmPassword && (
+                <div className="error-message">Passwords do not match</div>
+              )}
+            </div>
+
+            <div className="password-rules">
+              <div className={`rule ${passwordValidation.length ? 'valid' : ''}`}>
+                ✓ Password must be at least 8 characters long.
+              </div>
+              <div className={`rule ${passwordValidation.number ? 'valid' : ''}`}>
+                ✓ Password must contain at least one digit (0-9).
+              </div>
+              <div className={`rule ${passwordValidation.uppercase ? 'valid' : ''}`}>
+                ✓ Password must contain at least one uppercase letter.
+              </div>
+            </div>
+
+            <button 
+              type="submit" 
+              className="continue-btn"
+              disabled={!Object.values(passwordValidation).every(Boolean) || !passwordMatch}
+            >
+              continue
+            </button>
+          </form>
+
+          <div className="login-link">
+            Already have an account? <a href="#" onClick={(e) => {e.preventDefault(); navigate('/login')}}>Login</a>
           </div>
-          <div className="form-group">
-            <label htmlFor="registerPassword">Password</label>
-            <input
-              type="password"
-              id="registerPassword"
-              name="password"
-              required
-              value={registerPassword}
-              onChange={(e) => setRegisterPassword(e.target.value)}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              required
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-          </div>
-          <button type="submit" className="btn">Continue</button>
-        </form>
-        <div className="already-account">
-          Already have an account?{" "}
-          <a href="#" onClick={e => {e.preventDefault(); navigate("/login");}}>Login</a>
+        </div>
+
+        <div className="register-image">
+          <img src="/logo.png" alt="Notebook" />
         </div>
       </div>
     </div>
