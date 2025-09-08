@@ -11,7 +11,7 @@ export default function Register() {
     number: false,
     uppercase: false,
   });
-  const [passwordMatch, setPasswordMatch] = useState(true);
+  const [passwordMatch, setPasswordMatch] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const navigate = useNavigate();
@@ -27,6 +27,8 @@ export default function Register() {
   useEffect(() => {
     if (confirmPassword) {
       setPasswordMatch(password === confirmPassword);
+    }else {
+      setPasswordMatch(false);
     }
   }, [password, confirmPassword]);
 
@@ -110,25 +112,25 @@ export default function Register() {
 </div>
 
             <div className={`password-rules ${allValid ? 'all-valid' : ''}`}>
-              <div className={`rule ${passwordValidation.length ? 'valid' : 'invalid'}`}>
-                <span className="rule-icon">
-                  {passwordValidation.length ? '✓' : '✕'}
-                </span>
-                Password must be at least 8 characters long.
-              </div>
-              <div className={`rule ${passwordValidation.number ? 'valid' : 'invalid'}`}>
-                <span className="rule-icon">
-                  {passwordValidation.number ? '✓' : '✕'}
-                </span>
-                Password must contain at least one digit (0-9).
-              </div>
-              <div className={`rule ${passwordValidation.uppercase ? 'valid' : 'invalid'}`}>
-                <span className="rule-icon">
-                  {passwordValidation.uppercase ? '✓' : '✕'}
-                </span>
-                Password must contain at least one uppercase letter.
-              </div>
-            </div>
+  <div className={`rule ${passwordValidation.length ? 'valid' : 'invalid'}`}>
+    <span className="rule-icon">
+      {passwordValidation.length ? '✓' : '✕'}
+    </span>
+    Password must be at least 8 characters long.
+  </div>
+  <div className={`rule ${passwordValidation.number ? 'valid' : 'invalid'}`}>
+    <span className="rule-icon">
+      {passwordValidation.number ? '✓' : '✕'}
+    </span>
+    Password must contain at least one digit (0-9).
+  </div>
+  <div className={`rule ${passwordValidation.uppercase ? 'valid' : 'invalid'}`}>
+    <span className="rule-icon">
+      {passwordValidation.uppercase ? '✓' : '✕'}
+    </span>
+    Password must contain at least one uppercase letter.
+  </div>
+</div>
 
             <button 
               type="submit" 
