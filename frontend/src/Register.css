@@ -129,15 +129,37 @@ h1 {
 }
 
 .rule {
-    color: #666;
-    margin-bottom: 5px;
+    color: #dc2626;
+    margin-bottom: 8px;
     font-size: 14px;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;  /* ลด gap ระหว่างไอคอนกับข้อความ */
+}
+
+.rule-icon {
+    font-weight: 900;  /* เพิ่มความหนาของไอคอน */
+    font-size: 12px;   /* ลดขนาดไอคอน */
+    width: 16px;       /* กำหนดความกว้างคงที่ */
+    height: 16px;      /* กำหนดความสูงคงที่ */
+    display: flex;     /* ใช้ flex เพื่อจัดกึ่งกลาง */
+    align-items: center;
+    justify-content: center;
+}
+
+.rule.invalid {
+    color: #dc2626; /* สีแดง */
+}
+
+.rule.invalid .rule-icon {
+    color: #dc2626;
 }
 
 .rule.valid {
+    color: #22c55e; /* สีเขียว */
+}
+
+.rule.valid .rule-icon {
     color: #22c55e;
 }
 

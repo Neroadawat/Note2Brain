@@ -101,14 +101,23 @@ export default function Register() {
             </div>
 
             <div className="password-rules">
-              <div className={`rule ${passwordValidation.length ? 'valid' : ''}`}>
-                ✓ Password must be at least 8 characters long.
+              <div className={`rule ${passwordValidation.length ? 'valid' : 'invalid'}`}>
+                <span className="rule-icon">
+                  {passwordValidation.length ? '✓' : '✕'}
+                </span>
+                Password must be at least 8 characters long.
               </div>
-              <div className={`rule ${passwordValidation.number ? 'valid' : ''}`}>
-                ✓ Password must contain at least one digit (0-9).
+              <div className={`rule ${passwordValidation.number ? 'valid' : 'invalid'}`}>
+                <span className="rule-icon">
+                  {passwordValidation.number ? '✓' : '✕'}
+                </span>
+                Password must contain at least one digit (0-9).
               </div>
-              <div className={`rule ${passwordValidation.uppercase ? 'valid' : ''}`}>
-                ✓ Password must contain at least one uppercase letter.
+              <div className={`rule ${passwordValidation.uppercase ? 'valid' : 'invalid'}`}>
+                <span className="rule-icon">
+                  {passwordValidation.uppercase ? '✓' : '✕'}
+                </span>
+                Password must contain at least one uppercase letter.
               </div>
             </div>
 
