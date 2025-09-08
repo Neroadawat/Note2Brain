@@ -12,6 +12,8 @@ export default function Register() {
     uppercase: false,
   });
   const [passwordMatch, setPasswordMatch] = useState(true);
+  const [showError, setShowError] = useState(false);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,6 +61,8 @@ export default function Register() {
     }
   };
 
+  const allValid = Object.values(passwordValidation).every(Boolean);
+
   return (
     <div className="register-page">
       <div className="register-container">
@@ -95,12 +99,17 @@ export default function Register() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
               />
-              {!passwordMatch && confirmPassword && (
-                <div className="error-message">Passwords do not match</div>
-              )}
             </div>
 
-            <div className="password-rules">
+            <div className={`password-status ${
+  !confirmPassword ? 'neutral' : 
+  passwordMatch ? 'match' : 'not-match'
+}`}>
+  {!confirmPassword ? 'Password do not match' :
+   passwordMatch ? 'Password match' : 'Password do not match'}
+</div>
+
+            <div className={`password-rules ${allValid ? 'all-valid' : ''}`}>
               <div className={`rule ${passwordValidation.length ? 'valid' : 'invalid'}`}>
                 <span className="rule-icon">
                   {passwordValidation.length ? '✓' : '✕'}
@@ -124,9 +133,18 @@ export default function Register() {
             <button 
               type="submit" 
               className="continue-btn"
-              disabled={!Object.values(passwordValidation).every(Boolean) || !passwordMatch}
+              disabled={!allValid || !passwordMatch}
+              onMouseEnter={() => setShowError(true)}
+              onMouseLeave={() => setShowError(false)}
             >
-              continue
+              <span>c</span>
+              <span>o</span>
+              <span>n</span>
+              <span>t</span>
+              <span>i</span>
+              <span>n</span>
+              <span>u</span>
+              <span>e</span>
             </button>
           </form>
 
