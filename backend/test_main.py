@@ -32,8 +32,8 @@ async def test_register_password_mismatch():
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         response = await ac.post("/register", json={
             "email": "user@example.com",
-            "password": "Password123",
-            "confirm_password": "Password321"
+            "password": "Password1",
+            "confirm_password": "Password2"
         })
     assert response.status_code == 400
     assert response.json()["detail"] == "Passwords do not match"
