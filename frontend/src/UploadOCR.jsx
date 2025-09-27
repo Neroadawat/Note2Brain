@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import './UploadOCR.css';
+import { useNavigate } from "react-router-dom";
+import "./Document.css"; // ใช้ style summary เดียวกับ Document
 
 export default function UploadOCR() {
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -19,43 +22,56 @@ export default function UploadOCR() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!file) return;
+    e.preventDefault();
+    if (!file) return;
 
-  setLoading(true);
-  setError(null);
-  setResult(null);
+    setLoading(true);
+    setError(null);
+    setResult(null);
 
-  const formData = new FormData();
-  formData.append('file', file);
+    const formData = new FormData();
+    formData.append('file', file);
 
-  try {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      throw new Error("User not logged in");
+    try {
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        throw new Error("User not logged in");
+      }
+
+      const response = await fetch(`http://localhost:8000/upload?user_id=${userId}`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('OCR process failed');
+      }
+
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
     }
-
-    const response = await fetch(`http://localhost:8000/upload?user_id=${userId}`, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('OCR process failed');
-    }
-
-    const data = await response.json();
-    setResult(data);
-  } catch (err) {
-    setError(err.message || 'Something went wrong');
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="upload-container">
       <div className="upload-card">
+        {/* ส่วนหัวเหมือน Document */}
+        <header className="home-header" style={{ position: "relative", marginBottom: 16 }}>
+          <img src="/logo.png" alt="logo" className="home-logo" />
+          <span className="home-title">note2brain</span>
+          <button
+            className="back-btn"
+            onClick={() => navigate("/home")}
+          >
+            &#8592; Home
+          </button>
+        </header>
+        <hr className="home-divider" />
+
         <h1 className="upload-title">
           PDF OCR Extractor
         </h1>
@@ -96,13 +112,14 @@ export default function UploadOCR() {
               </pre>
             </div>
             
-            <h2 className="result-title">
-              Summary:
-            </h2>
-            <div className="result-content">
-              <p className="result-text">
-                {result.summary}
-              </p>
+            {/* Summary section ใช้ style เดียวกับ Document */}
+            <div className="summary-section">
+              <h2 className="summary-title">Summary:</h2>
+              <div className="summary-content">
+                <p className="summary-text">
+                  {result.summary}
+                </p>
+              </div>
             </div>
           </div>
         )}

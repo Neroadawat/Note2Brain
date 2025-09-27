@@ -125,3 +125,18 @@ async def upload_file(
         "ocr_text": ocr_text,
         "summary": summary
     }
+
+@app.get("/documents")
+async def get_documents(user_id: int, prisma=Depends(get_prisma)):
+    docs = await prisma.document.find_many(
+        where={"ownerId": user_id},
+        order={"createdAt": "desc"}
+    )
+    return docs
+
+@app.get("/document/{id}")
+async def get_document(id: str, prisma=Depends(get_prisma)):
+    doc = await prisma.document.find_unique(where={"id": id})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return doc
