@@ -34,9 +34,8 @@ export default function Home() {
 
   return (
     <div className="home-root">
-      <header className="home-header" style={{ position: "relative" }}>
+      <header className="home-header">
         <img src="/logo.png" alt="logo" className="home-logo" />
-        <span className="home-title">note2brain</span>
         <button
           className="logout-btn"
           onClick={handleLogout}
@@ -73,7 +72,7 @@ export default function Home() {
         <div className="home-upload-btn-wrap">
           <button className="home-upload-btn" onClick={() => navigate("/upload")}>
             <span className="home-upload-plus">+</span>
-            Upload file PDF.
+            <span className="home-upload-text">Upload files</span>
           </button>
         </div>
       </main>

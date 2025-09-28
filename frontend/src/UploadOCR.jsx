@@ -13,13 +13,11 @@ export default function UploadOCR() {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile?.type === 'application/pdf') {
-      setFile(selectedFile);
-      setError(null);
+        setFile(selectedFile);
     } else {
-      setError('Please select a PDF file');
-      setFile(null);
+        setFile(null);
     }
-  };
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -62,29 +60,32 @@ export default function UploadOCR() {
         {/* ส่วนหัวเหมือน Document */}
         <header className="home-header" style={{ position: "relative", marginBottom: 16 }}>
           <img src="/logo.png" alt="logo" className="home-logo" />
-          <span className="home-title">note2brain</span>
           <button
-            className="back-btn"
+            className="logout-btn"  // เปลี่ยนจาก back-btn เป็น logout-btn
             onClick={() => navigate("/home")}
           >
-            &#8592; Home
+            Home
           </button>
         </header>
         <hr className="home-divider" />
 
         <h1 className="upload-title">
-          PDF OCR Extractor
+          OCR PDF EXTRACTOR
+          <span>Transform your PDFs into editable text with <strong className="brand-name">NOTE2BRAIN</strong></span>
         </h1>
 
         <form onSubmit={handleSubmit} className="upload-form">
-          <div className="file-upload-area">
-            <input
-              type="file"
-              accept=".pdf"
-              onChange={handleFileChange}
-              className="file-input"
-            />
-          </div>
+          <div 
+    className={`file-upload-area ${file ? 'has-file' : ''}`}
+    data-file-name={file ? file.name : ''}
+>
+    <input
+        type="file"
+        accept=".pdf"
+        onChange={handleFileChange}
+        className="file-input"
+    />
+</div>
 
           <button
             type="submit"
@@ -94,12 +95,6 @@ export default function UploadOCR() {
             {loading ? 'Processing...' : 'Extract Text'}
           </button>
         </form>
-
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
 
         {result && (
           <div className="result-section">
