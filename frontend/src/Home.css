@@ -185,27 +185,32 @@ body::after {
 
 /* แก้ไขปุ่ม logout */
 .logout-btn {
-    position: relative;  /* เปลี่ยนจาก absolute เป็น relative */
-    right: 0;           /* ลบ right */
-    top: 0;            /* ลบ top */
-    transform: none;    /* ลบ transform */
+    position: relative;
     background: #f5f5f5;
     border: none;
     border-radius: 15px;
-    padding: 0.8rem 1.6rem;
+    padding: 0.8rem 1.6rem 0.8rem 1rem; /* ปรับ padding ด้านขวาให้น้อยลง */
     font-weight: 500;
     cursor: pointer;
     font-size: 15px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* เพิ่มเงาให้เข้มขึ้น */
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     color: #144b7d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logout-btn::before {
+    content: "←"; /* เพิ่มลูกศร */
+    font-size: 18px;
 }
 
 .logout-btn:hover {
     background: #144b7d;
     color: white;
-    transform: translateY(-5px);  /* แก้ไข transform */
-    box-shadow: 0 5px 15px rgba(20, 75, 125, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(20, 75, 125, 0.5); /* เพิ่มเงาตอน hover */
 }
 
 /* ปรับความนุ่มนวลโดยรวม */

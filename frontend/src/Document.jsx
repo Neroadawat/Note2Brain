@@ -34,22 +34,8 @@ export default function Document() {
         <button
           className="back-btn"
           onClick={() => navigate("/home")}
-          style={{
-            position: "absolute",
-            right: 16,
-            top: "50%",
-            transform: "translateY(-50%)",
-            background: "#eee",
-            border: "none",
-            borderRadius: 8,
-            padding: "0.5rem 1.2rem",
-            fontWeight: "bold",
-            cursor: "pointer",
-            fontSize: 16,
-            boxShadow: "0 1px 4px rgba(0,0,0,0.04)"
-          }}
         >
-          &#8592; Home
+          Home
         </button>
       </header>
       <hr className="home-divider" />
@@ -63,11 +49,14 @@ export default function Document() {
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 32, justifyContent: "center" }}>
-          <button className="home-upload-btn" onClick={() => navigate(`/flashcard/${doc.id}`)}>
-            Flash card
+        <div className="button-container">
+          <button className="simple-button" onClick={() => navigate(`/document/${id}/context`)}>
+            Full Context
           </button>
-          <button className="home-upload-btn" onClick={() => navigate(`/quiz/${doc.id}`)}>
+          <button className="simple-button" onClick={() => navigate(`/document/${id}/flashcard`)}>
+            Flash Card
+          </button>
+          <button className="simple-button" onClick={() => navigate(`/document/${id}/quiz`)}>
             Quiz
           </button>
         </div>

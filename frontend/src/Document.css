@@ -31,20 +31,100 @@
 
 .back-btn {
   position: absolute;
-  right: 16px;
+  right: 24px; /* ปรับขยับซ้ายจาก 16px เป็น 24px */
   top: 50%;
   transform: translateY(-50%);
-  background: #eee;
+  background: #f5f5f5;
   border: none;
-  border-radius: 8px;
-  padding: 0.5rem 1.2rem;
-  font-weight: bold;
+  border-radius: 15px;
+  padding: 0.8rem 1.6rem 0.8rem 1rem;
+  font-weight: 500;
   cursor: pointer;
-  font-size: 16px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-  transition: background 0.2s;
+  font-size: 15px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  color: #144b7d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-btn::before {
+  content: "←";
+  font-size: 18px;
 }
 
 .back-btn:hover {
-  background: #ddd;
+  background: #144b7d;
+  color: white;
+  transform: translateY(-50%) translateY(-5px);
+  box-shadow: 0 12px 25px rgba(20, 75, 125, 0.5);
+}
+
+.button-container {
+  display: flex;
+  gap: 20px;  /* เพิ่มระยะห่างระหว่างปุ่ม */
+  margin-top: 30px;
+  justify-content: center;
+}
+
+.simple-button {
+  background: #144b7d;
+  color: white;
+  border: none;
+  border-radius: 12px;  /* เพิ่มความมนของขอบ */
+  padding: 14px 32px;   /* Adjust padding to be equal on both sides */
+  font-size: 15px;        /* ปรับขนาดให้เท่ากับปุ่ม Extract Text */
+  font-weight: 500;       /* ปรับความหนาให้เท่ากับปุ่ม Extract Text */
+  cursor: pointer;
+  min-width: 140px;     /* เพิ่มความกว้างขั้นต่ำ */
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  letter-spacing: normal; /* ลบ letter-spacing เพื่อให้เหมือนกัน */
+}
+
+/* Remove these icon-related styles */
+.simple-button::before {
+  display: none; /* or remove this entire block */
+}
+
+.simple-button:nth-child(1)::before,
+.simple-button:nth-child(2)::before,
+.simple-button:nth-child(3)::before {
+  display: none; /* or remove these blocks entirely */
+}
+
+/* ปรับแต่ง hover effect */
+.simple-button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(20, 75, 125, 0.4);
+  background: linear-gradient(135deg, #144b7d, #1a5c99);
+}
+
+/* เพิ่ม active effect */
+.simple-button:active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(20, 75, 125, 0.3);
+}
+
+/* เพิ่ม gradient overlay effect */
+.simple-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.simple-button:hover::after {
+  opacity: 1;
 }

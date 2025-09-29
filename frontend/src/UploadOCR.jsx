@@ -57,13 +57,9 @@ export default function UploadOCR() {
   return (
     <div className="upload-container">
       <div className="upload-card">
-        {/* ส่วนหัวเหมือน Document */}
         <header className="home-header" style={{ position: "relative", marginBottom: 16 }}>
           <img src="/logo.png" alt="logo" className="home-logo" />
-          <button
-            className="logout-btn"  // เปลี่ยนจาก back-btn เป็น logout-btn
-            onClick={() => navigate("/home")}
-          >
+          <button className="logout-btn" onClick={() => navigate("/home")}>
             Home
           </button>
         </header>
@@ -71,43 +67,34 @@ export default function UploadOCR() {
 
         <h1 className="upload-title">
           OCR PDF EXTRACTOR
-          <span>Transform your PDFs into editable text with <strong className="brand-name">NOTE2BRAIN</strong></span>
         </h1>
 
         <form onSubmit={handleSubmit} className="upload-form">
           <div 
-    className={`file-upload-area ${file ? 'has-file' : ''}`}
-    data-file-name={file ? file.name : ''}
->
-    <input
-        type="file"
-        accept=".pdf"
-        onChange={handleFileChange}
-        className="file-input"
-    />
-</div>
+            className={`file-upload-area ${file ? 'has-file' : ''}`}
+            data-file-name={file ? file.name : ''}
+          >
+            <input
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="file-input"
+            />
+          </div>
 
+          {/* แสดงปุ่ม Extract Text เสมอ แต่ disable ถ้ายังไม่มีไฟล์ หรือกำลัง loading */}
           <button
             type="submit"
             disabled={!file || loading}
-            className="submit-button"
+            className={`submit-button ${!file ? 'disabled' : ''}`}
           >
             {loading ? 'Processing...' : 'Extract Text'}
           </button>
         </form>
 
+        {/* แสดง summary ถ้ามี result */}
         {result && (
           <div className="result-section">
-            <h2 className="result-title">
-              Extracted Text:
-            </h2>
-            <div className="result-content">
-              <pre className="result-text">
-                {result.ocr_text}
-              </pre>
-            </div>
-            
-            {/* Summary section ใช้ style เดียวกับ Document */}
             <div className="summary-section">
               <h2 className="summary-title">Summary:</h2>
               <div className="summary-content">
