@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./Document.css";
+import QuizGenerate from "./QuizGenerate.jsx";
 
 export default function Document() {
   const { id } = useParams();
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -56,9 +58,16 @@ export default function Document() {
           <button className="simple-button" onClick={() => navigate(`/document/${id}/flashcard`)}>
             Flash Card
           </button>
-          <button className="simple-button" onClick={() => navigate(`/document/${id}/quiz`)}>
+          <button className="simple-button" onClick={() => setShowModal(true)}>
             Quiz
           </button>
+          {showModal && (
+            <QuizGenerate
+              document={doc}
+              onCreated={(quizId) => navigate(`/document/${id}`)}
+              onClose={() => setShowModal(false)}
+            />
+          )}
         </div>
       </main>
     </div>
