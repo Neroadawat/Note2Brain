@@ -7,10 +7,12 @@ import tempfile
 import io
 from db import get_prisma
 from quiz import router as quiz_router
+from flashCard import router as flashcard_router
 
 app = FastAPI()
 
 app.include_router(quiz_router)
+app.include_router(flashcard_router)
 
 # Add CORS middleware
 app.add_middleware(
