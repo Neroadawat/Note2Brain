@@ -87,7 +87,6 @@ model FlashcardAttempt {
   userId       Int
   flashcardId  Int
   score        Int
-  timeSpent    Int  
   attemptedAt  DateTime   @default(now())
   flashcard    Flashcard  @relation(fields: [flashcardId], references: [id])
   user         User       @relation(fields: [userId], references: [id])
