@@ -5,6 +5,7 @@ import Register from './Register';
 import UploadOCR  from './UploadOCR';
 import Home from './Home';
 import Document from './Document';
+import Quiz from './Quiz';  // เพิ่ม import
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <Route path="/upload" element={<UploadOCR />} />
           <Route path="/home" element={<Home />} />
           <Route path="/document/:id" element={<Document />} />
+          <Route path="/document/:id/quiz" element={<Quiz />} /> {/* เพิ่ม route สำหรับ Quiz */}
           <Route path="*" element={<Login />} /> {/* default to login */}
         </Routes>
       </div>
