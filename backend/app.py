@@ -7,7 +7,7 @@ import tempfile
 import io
 from db import get_prisma
 from quiz import router as quiz_router
-from flashCard import router as flashcard_router
+from flashcard import router as flashcard_router
 from main import router as main_router
 app = FastAPI()
 app.include_router(main_router)
