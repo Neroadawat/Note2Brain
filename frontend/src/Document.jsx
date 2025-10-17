@@ -64,7 +64,10 @@ export default function Document() {
           {showModal && (
             <QuizGenerate
               document={doc}
-              onCreated={(quizId) => navigate(`/document/${id}`)}
+              onCreated={(quizId) => {
+                setShowModal(false);
+                navigate(`/document/${id}/quiz`);
+              }}
               onClose={() => setShowModal(false)}
             />
           )}
