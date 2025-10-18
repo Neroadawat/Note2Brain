@@ -1,7 +1,35 @@
 /* ==============================================
+   Modern Tech Theme for Quiz History Page
+   (White Card Version)
+   ============================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --deep-blue: #0a192f;
+  --primary-blue: #3b82f6;
+  --light-blue: #38bdf8;
+  --danger-red: #ef4444;
+  --white: #ffffff;
+  --text-dark: #1e293b;
+  --text-medium: #475569;
+  --text-light: #64748b;
+  --border-light: #e2e8f0;
+  --bg-light: #f8fafc;
+}
+
+/* Global body style (should be in index.css) */
+body {
+  background-color: var(--deep-blue);
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* ==============================================
    Main Container & Header
    ============================================== */
-
 .history-container {
   max-width: 900px;
   margin: 0 auto;
@@ -12,151 +40,72 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .history-title {
   font-size: 36px;
   font-weight: 700;
-  color: #1e40af;
+  color: #e6f1ff; /* White color for dark background */
   margin: 0;
-  /* ✨ Animation: Title Fade In */
-  animation: fadeIn 0.5s ease-out 0.2s backwards;
+  animation: fadeIn 0.5s ease-out;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .clear-history-btn {
-  padding: 12px 24px;
-  border: none;
-  border-radius: 10px;
-  background: #ef4444;
-  color: white;
+  padding: 10px 20px;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--danger-red);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .clear-history-btn:hover {
-  background: #dc2626;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--danger-red);
 }
 
 /* ==============================================
-   Empty State (When no history exists)
+   ✨ White Card History List
    ============================================== */
-
-.empty-state {
-  text-align: center;
-  padding: 80px 20px;
-  animation: fadeIn 0.6s ease-out;
-}
-
-.empty-icon {
-  font-size: 80px;
-  margin-bottom: 24px;
-  /* ✨ Animation: Bouncing Icon */
-  animation: bounce 1.5s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
-}
-
-.empty-title {
-  font-size: 28px;
-  font-weight: 700;
-  color: #2d3748;
-  margin-bottom: 12px;
-}
-
-.empty-description {
-  font-size: 16px;
-  color: #718096;
-  margin-bottom: 32px;
-}
-
-.empty-btn {
-  padding: 14px 32px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
-}
-
-.empty-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(30, 64, 175, 0.4);
-}
-
-/* ==============================================
-   History List & Cards
-   ============================================== */
-
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
 }
 
-/* ✨ Animation: New card entrance animation */
 @keyframes slideUpFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .history-card {
-  background: white;
+  background: var(--white);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
   opacity: 0;
-  animation: slideUpFadeIn 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  animation: slideUpFadeIn 0.5s ease-out forwards;
 }
-
-/* ✨ Technique: Staggered animation for list items */
-.history-card:nth-child(1) { animation-delay: 0.1s; }
-.history-card:nth-child(2) { animation-delay: 0.2s; }
-.history-card:nth-child(3) { animation-delay: 0.3s; }
-.history-card:nth-child(4) { animation-delay: 0.4s; }
-.history-card:nth-child(5) { animation-delay: 0.5s; }
 
 .history-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 12px 28px rgba(30, 64, 175, 0.2);
-  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
+/* --- Card Content --- */
 .history-card-header {
   display: flex;
   justify-content: space-between;
@@ -164,48 +113,24 @@
   margin-bottom: 20px;
 }
 
-.history-info {
-  flex: 1;
-}
-
 .history-doc-name {
   font-size: 20px;
   font-weight: 700;
-  color: #2d3748;
-  margin: 0 0 8px 0;
-  transition: color 0.3s ease;
-}
-
-.history-card:hover .history-doc-name {
-  color: #1e40af;
+  color: var(--text-dark);
 }
 
 .history-date {
   font-size: 14px;
-  color: #718096;
-  margin: 0;
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.8); }
-  to { opacity: 1; transform: scale(1); }
+  color: var(--text-light);
 }
 
 .history-score-badge {
-  padding: 12px 20px;
-  border-radius: 12px;
-  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--primary-blue);
+  color: var(--white);
   font-weight: 700;
   font-size: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  min-width: 80px;
-  text-align: center;
-  /* ✨ Animation: Score badge pop-in */
-  animation: scaleIn 0.5s ease-out 0.4s backwards;
-}
-
-.history-card-body {
-  margin-bottom: 20px;
 }
 
 .history-stat-row {
@@ -221,27 +146,20 @@
   gap: 8px;
 }
 
-.stat-icon {
-  font-size: 18px;
-}
-
 .stat-text {
   font-size: 15px;
-  color: #4a5568;
-  font-weight: 500;
+  color: var(--text-medium);
 }
 
 .history-grade {
   font-size: 15px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .history-progress-bar {
   width: 100%;
   height: 8px;
-  background: #e2e8f0;
+  background: #f1f5f9;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -249,120 +167,112 @@
 .history-progress-fill {
   height: 100%;
   border-radius: 4px;
-  /* ✨ Transition: Smooth progress bar fill */
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  background: var(--primary-blue);
+  transition: width 1s ease-in-out;
 }
 
 .history-card-footer {
   display: flex;
   gap: 12px;
   padding-top: 20px;
-  border-top: 2px solid #f7fafc;
+  border-top: 1px solid var(--border-light);
 }
 
-/* ==============================================
-   Action Buttons
-   ============================================== */
-
+/* --- ✨ Action Buttons (matched to QuizResult) --- */
 .history-action-btn {
   flex: 1;
   padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
   transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-/* ✨ Technique: Improved active state for all buttons */
-.history-action-btn:active, .clear-history-btn:active, .empty-btn:active {
-  transform: translateY(1px) scale(0.98);
-  transition: transform 0.1s ease;
+.history-action-btn:hover {
+  transform: translateY(-2px);
 }
 
-/* ✨ Technique: Animated Gradient for View Button */
 .view-btn {
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #1e40af 100%);
-  background-size: 250% 250%;
-  color: white;
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.25);
-  transition: background-position 0.5s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  background: var(--primary-blue);
+  color: var(--white);
+  border: 1px solid var(--primary-blue);
 }
-
 .view-btn:hover {
-  background-position: 100% 0;
-  transform: translateY(-3px);
-  box-shadow: 0 7px 20px rgba(30, 64, 175, 0.4);
+  background: #60a5fa;
+  border-color: #60a5fa;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
 }
 
 .retry-btn {
-  background: #f7fafc;
-  color: #1e40af;
-  border: 2px solid #1e40af;
+  background: transparent;
+  color: var(--text-medium);
+  border: 1px solid var(--border-light);
 }
-
 .retry-btn:hover {
-  background: #e0e7ff;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(224, 231, 255, 0.8);
+  border-color: var(--text-medium);
+  background: var(--bg-light);
 }
 
 .delete-btn {
-  background: #fee2e2;
-  color: #dc2626;
-  border: 2px solid transparent;
+  background: transparent;
+  color: var(--danger-red);
+  border: 1px solid #fee2e2;
 }
-
 .delete-btn:hover {
-  background: #fecaca;
-  border-color: #dc2626;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
+  background: #fee2e2;
+  border-color: var(--danger-red);
 }
 
 /* ==============================================
-   Responsive Design
+   Empty State (White Card Version)
    ============================================== */
+.empty-state {
+  text-align: center;
+  padding: 60px 40px;
+  background: var(--white);
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.6s ease-out;
+}
 
+.empty-icon {
+  color: var(--primary-blue);
+}
+
+.empty-title {
+  color: var(--text-dark);
+}
+
+.empty-description {
+  color: var(--text-light);
+}
+
+.empty-btn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  background: var(--primary-blue);
+  color: var(--white);
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.empty-btn:hover {
+  background: #60a5fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-  .history-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-  }
-  .history-title {
-    font-size: 28px;
-  }
-  .clear-history-btn {
-    width: 100%;
-  }
-  .history-card {
-    padding: 20px;
-  }
-  .history-card-header {
-    flex-direction: column;
-    gap: 16px;
-  }
-  .history-score-badge {
-    align-self: flex-start;
-  }
-  .history-card-footer {
-    flex-direction: column;
-  }
-  .history-action-btn {
-    width: 100%;
-  }
-  .empty-state {
-    padding: 60px 20px;
-  }
-  .empty-icon {
-    font-size: 64px;
-  }
-  .empty-title {
-    font-size: 24px;
-  }
+  .history-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .history-title { font-size: 28px; }
+  .history-card-header { flex-direction: column; gap: 16px; }
+  .history-card-footer { flex-direction: column; }
 }

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { FileText, Layers, Lightbulb } from 'lucide-react'; // ✨ 1. Import ไอคอนที่ต้องการ
 import "./Document.css";
 import QuizGenerate from "./QuizGenerate.jsx";
 
 export default function Document() {
   const { id } = useParams();
+  console.log("Document page ID:", id);
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -52,13 +54,17 @@ export default function Document() {
           </div>
         </div>
         <div className="button-container">
+          {/* ✨ 2. เพิ่มไอคอนเข้าไปในปุ่ม */}
           <button className="simple-button" onClick={() => navigate(`/document/${id}/context`)}>
+            <FileText size={16} />
             Full Context
           </button>
           <button className="simple-button" onClick={() => navigate(`/document/${id}/flashcard`)}>
+            <Layers size={16} />
             Flash Card
           </button>
           <button className="simple-button" onClick={() => setShowModal(true)}>
+            <Lightbulb size={16} />
             Quiz
           </button>
           {showModal && (

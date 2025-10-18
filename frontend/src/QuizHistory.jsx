@@ -1,121 +1,129 @@
-export default function QuizResult() {
-  const location = useLocation();
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  History, 
+  CheckCircle2, 
+  XCircle, 
+  FileText, 
+  Trash2, 
+  RotateCw, 
+  View,
+  ArrowLeft // ✨ 1. Import ไอคอนลูกศร
+} from 'lucide-react';
+
+import './QuizHistory.css'; 
+
+export default function QuizHistory() {
   const navigate = useNavigate();
-  const { id } = useParams();
-  
-  const { score, totalQuestions, answeredCount, documentName } = location.state || {
-    score: 0,
-    totalQuestions: 0,
-    answeredCount: 0,
-    documentName: "Unknown Document"
+  const [quizHistory, setQuizHistory] = useState([]);
+
+  useEffect(() => {
+    try {
+      const savedHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+      setQuizHistory(savedHistory);
+    } catch (error) {
+      console.error('Error reading from localStorage:', error);
+      setQuizHistory([]);
+    }
+  }, []);
+
+  const handleClearHistory = () => {
+    localStorage.removeItem('quizHistory');
+    setQuizHistory([]);
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 80) return "#10b981";
-    if (score >= 60) return "#f59e0b";
-    return "#ef4444";
+  const getGrade = (score) => {
+    if (score >= 90) return { text: 'A+', color: '#059669' };
+    if (score >= 80) return { text: 'A', color: '#059669' };
+    if (score >= 70) return { text: 'B+', color: '#0284c7' };
+    if (score >= 60) return { text: 'B', color: '#0284c7' };
+    if (score >= 50) return { text: 'C', color: '#d97706' };
+    return { text: 'F', color: '#dc2626' };
   };
 
-  const getScoreEmoji = (score) => {
-    if (score >= 80) return "🎉";
-    if (score >= 60) return "👍";
-    return "💪";
-  };
-
-  const getScoreMessage = (score) => {
-    if (score >= 80) return "Excellent!";
-    if (score >= 60) return "Good Job!";
-    return "Keep Learning!";
-  };
-
-  const getScoreDescription = (score) => {
-    if (score >= 80) return "Outstanding performance! You've mastered this material.";
-    if (score >= 60) return "Great work! You're making solid progress.";
-    return "Keep practicing! Every attempt makes you stronger.";
-  };
-
-  const correctAnswers = Math.round((score / 100) * answeredCount);
-  const incorrectAnswers = answeredCount - correctAnswers;
+  // --- ✨ 2. แก้ไขส่วนนี้ทั้งหมด ---
+  if (quizHistory.length === 0) {
+    return (
+      <div className="history-container">
+        <div className="empty-state">
+          <History size={64} className="empty-icon" />
+          <h2 className="empty-title">No Quiz History</h2>
+          <p className="empty-description">
+            It looks like you haven't taken any quizzes yet.
+          </p>
+          {/* เปลี่ยนปุ่มเป็น "Go Back" และใช้ navigate(-1) */}
+          <button className="empty-btn" onClick={() => navigate(-1)}>
+            <ArrowLeft size={18} />
+            Go Back
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="home-root">
-      <header className="home-header">
-        <img src="/logo.png" alt="logo" className="home-logo" />
-        <span className="home-title">note2brain</span>
+    <div className="history-container">
+      <header className="history-header">
+        <h1 className="history-title">Quiz History</h1>
+        <button className="clear-history-btn" onClick={handleClearHistory}>
+          <Trash2 size={16} />
+          Clear All History
+        </button>
       </header>
-      <hr className="home-divider" />
-      <main className="home-main">
-        <div className="result-container">
-          <div className="result-card">
-            <div className="result-badge">Quiz Completed</div>
-            
-            <div className="result-emoji">{getScoreEmoji(score)}</div>
-            <h1 className="result-title">{getScoreMessage(score)}</h1>
-            <p className="result-description">{getScoreDescription(score)}</p>
-            <p className="result-document">📄 {documentName}</p>
-            
-            <div className="score-circle" style={{ borderColor: getScoreColor(score) }}>
-              <div className="score-value" style={{ color: getScoreColor(score) }}>
-                {score}%
-              </div>
-              <div className="score-label">Final Score</div>
-            </div>
 
-            <div className="result-stats">
-              <div className="stat-item">
-                <div className="stat-icon">✅</div>
-                <div className="stat-value" style={{ color: "#10b981" }}>{correctAnswers}</div>
-                <div className="stat-label">Correct</div>
+      <main className="history-list">
+        {/* ... ส่วน map ข้อมูลของคุณ (เหมือนเดิม) ... */}
+        {quizHistory.map((item, index) => {
+          const grade = getGrade(item.score);
+          const correctAnswers = Math.round((item.score / 100) * item.totalQuestions);
+          const incorrectAnswers = item.totalQuestions - correctAnswers;
+          
+          return (
+            <div 
+              key={item.id} 
+              className="history-card"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className="history-card-header">
+                <div className="history-info">
+                  <h3 className="history-doc-name">{item.documentName}</h3>
+                  <p className="history-date">{new Date(item.date).toLocaleString()}</p>
+                </div>
+                <div className="history-score-badge">{item.score}%</div>
               </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <div className="stat-icon">❌</div>
-                <div className="stat-value" style={{ color: "#ef4444" }}>{incorrectAnswers}</div>
-                <div className="stat-label">Incorrect</div>
+              <div className="history-card-body">
+                <div className="history-stat-row">
+                   <div className="history-stat">
+                    <CheckCircle2 size={20} color="#10b981" />
+                    <span className="stat-text">Correct: {correctAnswers}</span>
+                  </div>
+                  <div className="history-stat">
+                    <XCircle size={20} color="#ef4444" />
+                    <span className="stat-text">Incorrect: {incorrectAnswers}</span>
+                  </div>
+                  <div className="history-stat">
+                    <FileText size={20} color="#8892b0" />
+                    <span className="stat-text">Total: {item.totalQuestions}</span>
+                  </div>
+                  <div className="history-grade" style={{ color: grade.color }}>
+                    Grade: {grade.text}
+                  </div>
+                </div>
+                <div className="history-progress-bar">
+                  <div
+                    className="history-progress-fill"
+                    style={{ width: `${item.score}%` }}
+                  ></div>
+                </div>
               </div>
-              <div className="stat-divider"></div>
-              <div className="stat-item">
-                <div className="stat-icon">📝</div>
-                <div className="stat-value">{totalQuestions}</div>
-                <div className="stat-label">Total</div>
-              </div>
+              <footer className="history-card-footer">
+                <button className="history-action-btn view-btn"><View size={16} /> View</button>
+                <button className="history-action-btn retry-btn"><RotateCw size={16} /> Retry</button>
+                <button className="history-action-btn delete-btn"><Trash2 size={16} /> Delete</button>
+              </footer>
             </div>
-
-            <div className="progress-section">
-              <div className="progress-bar-container">
-                <div 
-                  className="progress-bar-fill"
-                  style={{ 
-                    width: `${score}%`,
-                    background: `linear-gradient(90deg, ${getScoreColor(score)}, ${getScoreColor(score)}dd)`
-                  }}
-                ></div>
-              </div>
-              <div className="progress-labels">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
-            </div>
-
-            <div className="result-actions">
-              <button 
-                className="result-btn result-btn-secondary"
-                onClick={() => navigate(`/document/${id}`)}
-              >
-                <span className="btn-icon">📚</span>
-                Back to Document
-              </button>
-              <button 
-                className="result-btn result-btn-primary"
-                onClick={() => navigate(`/quiz-history`)}
-              >
-                <span className="btn-icon">📊</span>
-                View History
-              </button>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </main>
     </div>
   );
