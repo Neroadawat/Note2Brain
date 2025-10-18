@@ -3,18 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 import requests
 import json
 from PyPDF2 import PdfReader
-import tempfile
 import io
 from db import get_prisma
 from quiz import router as quiz_router
 from flashcard import router as flashcard_router
 from main import router as main_router
+
 app = FastAPI()
+
+# ✅ รวม router จากโมดูลอื่น
 app.include_router(main_router)
 app.include_router(quiz_router)
 app.include_router(flashcard_router)
 
-# Add CORS middleware
+# ✅ ตั้งค่า CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],
@@ -26,22 +28,20 @@ app.add_middleware(
 TYPHOON_API_KEY = "sk-CZSRGqZVrGBdNuGgNGUXVs1R4HWjBlBSi65nIW4oTmy4Z8EC"
 
 
+# 🧠 OCR แบบทั้งไฟล์ครั้งเดียว (รุ่นแรก)
 def typhoon_ocr(file: UploadFile):
     url = "https://api.opentyphoon.ai/v1/ocr"
-
 
     file_bytes = file.file.read()
     pdf_stream = io.BytesIO(file_bytes)
 
-
     reader = PdfReader(pdf_stream)
     num_pages = len(reader.pages)
-    pages = list(range(1, num_pages + 1)) 
+    pages = list(range(1, num_pages + 1))
 
-   
     pdf_stream.seek(0)
-
     files = {"file": (file.filename, pdf_stream, file.content_type)}
+
     params = {
         "model": "typhoon-ocr-preview",
         "task_type": "default",
@@ -51,7 +51,9 @@ def typhoon_ocr(file: UploadFile):
         "repetition_penalty": 1.2,
         "pages": pages
     }
-    data = {"params": json.dumps(params)}
+    data = {"params": json.dumps(params),
+             "pages": json.dumps(pages)
+            }
     headers = {"Authorization": f"Bearer {TYPHOON_API_KEY}"}
 
     response = requests.post(url, files=files, data=data, headers=headers)
@@ -59,6 +61,7 @@ def typhoon_ocr(file: UploadFile):
         raise Exception(f"OCR Error {response.status_code}: {response.text}")
 
     result = response.json()
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
     # ✅ รวมข้อความจากทุกหน้า
     ocr_texts = []
@@ -77,7 +80,10 @@ def typhoon_ocr(file: UploadFile):
             print("Parse page error:", inner_e)
 
     return "\n".join(ocr_texts).strip()
+    
 
+
+# ✨ Summarization ด้วย Typhoon LLM
 def typhoon_summary(text: str):
     url = "https://api.opentyphoon.ai/v1/chat/completions"
     headers = {
@@ -85,7 +91,7 @@ def typhoon_summary(text: str):
         "Content-Type": "application/json"
     }
     payload = {
-        "model": "typhoon-v2.1-12b-instruct",   # เลือกรุ่น LLM ที่มี
+        "model": "typhoon-v2.1-12b-instruct",
         "messages": [
             {"role": "system", "content": "สรุปข้อความให้อ่านง่าย กระชับ"},
             {"role": "user", "content": text}
@@ -99,21 +105,22 @@ def typhoon_summary(text: str):
     return response.json()["choices"][0]["message"]["content"]
 
 
+# 📤 อัปโหลดไฟล์ → OCR → สรุป → บันทึกลงฐานข้อมูล
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
-    user_id: int = Query(...),  # เพิ่ม user_id parameter
-    prisma = Depends(get_prisma)  # เพิ่ม prisma dependency
+    user_id: int = Query(...),
+    prisma=Depends(get_prisma)
 ):
-    # 1. OCR
+    # 1️⃣ OCR
     ocr_text = typhoon_ocr(file)
     if not ocr_text:
         return {"error": "OCR ไม่สามารถอ่านไฟล์ได้"}
 
-    # 2. Summarize
+    # 2️⃣ สรุปข้อความ
     summary = typhoon_summary(ocr_text)
 
-    # 3. Save to database (เพิ่มใหม่)
+    # 3️⃣ บันทึกลงฐานข้อมูล
     document = await prisma.document.create(
         data={
             "filename": file.filename,
@@ -122,12 +129,15 @@ async def upload_file(
             "ownerId": user_id
         }
     )
+
     return {
         "filename": file.filename,
         "ocr_text": ocr_text,
         "summary": summary
     }
 
+
+# 📜 ดึงรายการเอกสารของ user
 @app.get("/documents")
 async def get_documents(user_id: int, prisma=Depends(get_prisma)):
     docs = await prisma.document.find_many(
@@ -136,6 +146,8 @@ async def get_documents(user_id: int, prisma=Depends(get_prisma)):
     )
     return docs
 
+
+# 🔍 ดึงเอกสารตาม id
 @app.get("/document/{id}")
 async def get_document(id: str, prisma=Depends(get_prisma)):
     doc = await prisma.document.find_unique(where={"id": id})
