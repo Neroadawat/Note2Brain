@@ -1,0 +1,92 @@
+/* ==============================================
+   Modern Tech Theme for Full Context Page
+   ============================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --deep-blue: #0a192f;
+  --white: #e6f1ff;
+  --light-slate: #ccd6f6;
+  --slate-gray: #8892b0; 
+  --card-bg: rgba(30, 64, 175, 0.1);
+  --card-border: rgba(56, 189, 248, 0.2);
+  
+  /* ✨ NEW: Defined a clear white-ish color for main text */
+  --white-text: #e0e6f1; 
+}
+
+@keyframes fadeInPage {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.context-container {
+  min-height: 100vh;
+  background-color: var(--deep-blue);
+  color: var(--light-slate);
+  padding: 40px;
+  animation: fadeInPage 0.5s ease-out;
+}
+
+.context-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--card-border);
+}
+
+.context-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--white); 
+}
+
+.context-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--light-slate);
+  border: 1px solid var(--card-border);
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.context-back-btn:hover {
+  background: var(--card-bg);
+  border-color: var(--light-slate);
+}
+
+.context-main {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.context-content-box {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 30px;
+  backdrop-filter: blur(5px);
+}
+
+.context-text {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: 'Inter', sans-serif;
+  
+  /* ✅ MODIFIED: Enhanced readability */
+  font-size: 17px;           /* Slightly larger text */
+  line-height: 1.8;          /* Increased line spacing for better flow */
+  color: var(--white-text);  /* Brighter, more readable text color */
+  font-weight: 400;          /* Ensure good weight for readability */
+  
+  margin: 0;
+}
