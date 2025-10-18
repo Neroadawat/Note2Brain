@@ -7,8 +7,7 @@ import {
   FileText, 
   Trash2, 
   RotateCw, 
-  View,
-  ArrowLeft // ✨ 1. Import ไอคอนลูกศร
+  View 
 } from 'lucide-react';
 
 import './QuizHistory.css'; 
@@ -32,6 +31,33 @@ export default function QuizHistory() {
     setQuizHistory([]);
   };
 
+  // ✨ 1. เพิ่มฟังก์ชันสำหรับจัดการปุ่มต่างๆ
+  const handleDeleteItem = (itemId) => {
+    // กรองเอาเฉพาะรายการที่ไม่ตรงกับ id ที่ต้องการลบ
+    const updatedHistory = quizHistory.filter(item => item.id !== itemId);
+    // อัปเดต State เพื่อให้หน้าจอเปลี่ยนแปลง
+    setQuizHistory(updatedHistory);
+    // บันทึกข้อมูลที่อัปเดตแล้วลง localStorage
+    localStorage.setItem('quizHistory', JSON.stringify(updatedHistory));
+  };
+
+  const handleRetryQuiz = (documentId) => {
+    // นำทางไปยังหน้าทำควิซของเอกสารนั้นๆ
+    navigate(`/document/${documentId}/quiz`);
+  };
+
+  const handleViewResult = (quizItem) => {
+    // เตรียมข้อมูลที่จะส่งไปให้หน้าแสดงผล
+    const resultData = {
+      score: quizItem.score,
+      totalQuestions: quizItem.totalQuestions,
+      documentName: quizItem.documentName,
+      answeredCount: quizItem.totalQuestions // สมมติว่าตอบครบทุกข้อ
+    };
+    // นำทางไปยังหน้าผลลัพธ์ พร้อมส่งข้อมูลไปด้วย
+    navigate(`/quiz/${quizItem.documentId}/result`, { state: resultData });
+  };
+
   const getGrade = (score) => {
     if (score >= 90) return { text: 'A+', color: '#059669' };
     if (score >= 80) return { text: 'A', color: '#059669' };
@@ -41,7 +67,6 @@ export default function QuizHistory() {
     return { text: 'F', color: '#dc2626' };
   };
 
-  // --- ✨ 2. แก้ไขส่วนนี้ทั้งหมด ---
   if (quizHistory.length === 0) {
     return (
       <div className="history-container">
@@ -49,12 +74,10 @@ export default function QuizHistory() {
           <History size={64} className="empty-icon" />
           <h2 className="empty-title">No Quiz History</h2>
           <p className="empty-description">
-            It looks like you haven't taken any quizzes yet.
+            It looks like you haven't taken any quizzes yet. Start learning and test your knowledge!
           </p>
-          {/* เปลี่ยนปุ่มเป็น "Go Back" และใช้ navigate(-1) */}
-          <button className="empty-btn" onClick={() => navigate(-1)}>
-            <ArrowLeft size={18} />
-            Go Back
+          <button className="empty-btn" onClick={() => navigate('/')}>
+            Explore Documents
           </button>
         </div>
       </div>
@@ -72,7 +95,6 @@ export default function QuizHistory() {
       </header>
 
       <main className="history-list">
-        {/* ... ส่วน map ข้อมูลของคุณ (เหมือนเดิม) ... */}
         {quizHistory.map((item, index) => {
           const grade = getGrade(item.score);
           const correctAnswers = Math.round((item.score / 100) * item.totalQuestions);
@@ -93,7 +115,7 @@ export default function QuizHistory() {
               </div>
               <div className="history-card-body">
                 <div className="history-stat-row">
-                   <div className="history-stat">
+                  <div className="history-stat">
                     <CheckCircle2 size={20} color="#10b981" />
                     <span className="stat-text">Correct: {correctAnswers}</span>
                   </div>
@@ -117,9 +139,16 @@ export default function QuizHistory() {
                 </div>
               </div>
               <footer className="history-card-footer">
-                <button className="history-action-btn view-btn"><View size={16} /> View</button>
-                <button className="history-action-btn retry-btn"><RotateCw size={16} /> Retry</button>
-                <button className="history-action-btn delete-btn"><Trash2 size={16} /> Delete</button>
+                {/* ✨ 2. เพิ่ม onClick ให้กับปุ่มทั้งหมด */}
+                <button className="history-action-btn view-btn" onClick={() => handleViewResult(item)}>
+                  <View size={16} /> View
+                </button>
+                <button className="history-action-btn retry-btn" onClick={() => handleRetryQuiz(item.documentId)}>
+                  <RotateCw size={16} /> Retry
+                </button>
+                <button className="history-action-btn delete-btn" onClick={() => handleDeleteItem(item.id)}>
+                  <Trash2 size={16} /> Delete
+                </button>
               </footer>
             </div>
           );
