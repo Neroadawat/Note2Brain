@@ -8,11 +8,12 @@ export default function Quiz() {
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchQuiz = async () => {
-      // Mock data สำหรับทดสอบ
       const mockData = {
         documentName: "Sample Document",
         questions: [
@@ -41,7 +42,6 @@ export default function Quiz() {
         console.log("Quiz data from API:", data);
         console.log("Questions length:", data?.questions?.length);
         
-        // เช็คว่ามีข้อมูลหรือไม่
         if (data && data.questions && data.questions.length > 0) {
           console.log("Using real data from API");
           setQuiz(data);
@@ -60,16 +60,69 @@ export default function Quiz() {
     fetchQuiz();
   }, [id]);
 
+  const handleAnswerChange = (answer) => {
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [currentQuestion]: answer
+    });
+  };
+
   const handlePrevious = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion(currentQuestion - 1);
+    if (currentQuestion > 0 && !isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentQuestion(currentQuestion - 1);
+        setIsTransitioning(false);
+      }, 300);
     }
   };
 
   const handleNext = () => {
-    if (quiz?.questions && currentQuestion < quiz.questions.length - 1) {
-      setCurrentQuestion(currentQuestion + 1);
+    if (quiz?.questions && currentQuestion < quiz.questions.length - 1 && !isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentQuestion(currentQuestion + 1);
+        setIsTransitioning(false);
+      }, 300);
     }
+  };
+
+  const handleSubmit = () => {
+    // คำนวณคะแนน
+    const answeredCount = Object.keys(selectedAnswers).length;
+    const score = Math.floor((answeredCount / totalQuestions) * 100);
+    
+    // บันทึก history ลง localStorage
+    const quizHistory = {
+      id: Date.now(),
+      documentId: id,
+      documentName: quiz.documentName,
+      score: score,
+      totalQuestions: totalQuestions,
+      answeredQuestions: answeredCount,
+      date: new Date().toISOString(),
+      answers: selectedAnswers
+    };
+    
+    // เก็บใน localStorage
+    try {
+      const existingHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
+      existingHistory.unshift(quizHistory); // เพิ่มรายการใหม่ไว้ด้านบน
+      localStorage.setItem('quizHistory', JSON.stringify(existingHistory));
+      console.log('Quiz history saved:', quizHistory);
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+    }
+    
+    // ไปหน้าแสดงผล
+    navigate(`/quiz/${id}/result`, { 
+      state: { 
+        score, 
+        totalQuestions, 
+        answeredCount,
+        documentName: quiz.documentName 
+      } 
+    });
   };
 
   if (loading) return <div className="home-root"><div>Loading...</div></div>;
@@ -77,6 +130,8 @@ export default function Quiz() {
 
   const totalQuestions = quiz.questions?.length || 0;
   const currentQ = quiz.questions?.[currentQuestion];
+  const isLastQuestion = currentQuestion === totalQuestions - 1;
+  const allAnswered = Object.keys(selectedAnswers).length === totalQuestions;
 
   return (
     <div className="home-root">
@@ -91,44 +146,61 @@ export default function Quiz() {
       <main className="home-main">
         <div className="quiz-section">
           {currentQ ? (
-            <div className="quiz-question-card">
+            <div className={`quiz-question-card ${isTransitioning ? 'transitioning' : ''}`}>
               <div className="quiz-question-box">
                 <div className="quiz-navigation">
                   <button 
-                    className="quiz-nav-btn" 
+                    className="quiz-nav-btn quiz-nav-prev" 
                     onClick={handlePrevious}
-                    disabled={currentQuestion === 0}
+                    disabled={currentQuestion === 0 || isTransitioning}
                   >
-                    ←
+                    <span className="nav-arrow">‹</span>
                   </button>
-                  <span>{currentQuestion + 1} / {totalQuestions}</span>
-                  <button 
-                    className="quiz-nav-btn" 
-                    onClick={handleNext}
-                    disabled={currentQuestion === totalQuestions - 1}
-                  >
-                    →
-                  </button>
+                  <span className="quiz-counter">
+                    <span className="current-number">{currentQuestion + 1}</span>
+                    <span className="divider">/</span>
+                    <span className="total-number">{totalQuestions}</span>
+                  </span>
+                  {isLastQuestion && allAnswered ? (
+                    <button 
+                      className="quiz-submit-btn" 
+                      onClick={handleSubmit}
+                      disabled={isTransitioning}
+                    >
+                      Submit
+                    </button>
+                  ) : (
+                    <button 
+                      className="quiz-nav-btn quiz-nav-next" 
+                      onClick={handleNext}
+                      disabled={currentQuestion === totalQuestions - 1 || isTransitioning}
+                    >
+                      <span className="nav-arrow">›</span>
+                    </button>
+                  )}
                 </div>
                 <div className="quiz-question">{currentQ.question}</div>
               </div>
               <div className="quiz-options">
-                <label>
-                  <input type="radio" name={`q${currentQuestion}`} value="A" />
-                  1) {currentQ.optionA}
-                </label>
-                <label>
-                  <input type="radio" name={`q${currentQuestion}`} value="B" />
-                  2) {currentQ.optionB}
-                </label>
-                <label>
-                  <input type="radio" name={`q${currentQuestion}`} value="C" />
-                  3) {currentQ.optionC}
-                </label>
-                <label>
-                  <input type="radio" name={`q${currentQuestion}`} value="D" />
-                  4) {currentQ.optionD}
-                </label>
+                {['A', 'B', 'C', 'D'].map((option) => (
+                  <label 
+                    key={option}
+                    className={`quiz-option-label ${selectedAnswers[currentQuestion] === option ? 'selected' : ''}`}
+                  >
+                    <input 
+                      type="radio" 
+                      name={`q${currentQuestion}`} 
+                      value={option}
+                      checked={selectedAnswers[currentQuestion] === option}
+                      onChange={() => handleAnswerChange(option)}
+                    />
+                    <span className="option-content">
+                      <span className="option-number">{option}</span>
+                      <span className="option-text">{currentQ[`option${option}`]}</span>
+                    </span>
+                    <span className="option-check"></span>
+                  </label>
+                ))}
               </div>
             </div>
           ) : (
