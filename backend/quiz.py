@@ -1,4 +1,4 @@
-# quiz.py
+# backend/quiz.py
 from fastapi import APIRouter, Query, Depends, HTTPException
 from pydantic import BaseModel
 from db import get_prisma

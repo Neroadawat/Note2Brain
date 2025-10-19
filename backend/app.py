@@ -1,3 +1,4 @@
+# backend/app.py
 from fastapi import FastAPI, UploadFile, File, Query, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import requests

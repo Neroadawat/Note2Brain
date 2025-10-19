@@ -1,3 +1,4 @@
+# backend/db.py
 from prisma import Prisma
 
 prisma = Prisma()
