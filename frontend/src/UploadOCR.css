@@ -1,221 +1,199 @@
+/* ✨ [NEW] เพิ่ม @property เพื่อให้อนิเมชัน smooth ใน Chrome */
+@property --angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
 .upload-container {
   min-height: 100vh;
-  background-color: #144b7d;  /* เปลี่ยนเป็นสีน้ำเงินหลัก */
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 2rem 1rem;
 }
 
 .upload-card {
   background-color: white;
-  border-radius: 30px;  /* เพิ่มความโค้งมนให้เข้ากับ design อื่นๆ */
-  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);  /* ปรับ shadow ให้ดูนุ่มนวล */
-  padding: 2rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  padding: 2.5rem;
   width: 100%;
-  max-width: 850px;  /* ปรับให้เท่ากับหน้าอื่นๆ */
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+}
+
+.upload-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.upload-logo {
+  width: 100px;
+  height: 100px;
 }
 
 .upload-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #000000;
-  margin-bottom: 2rem;
+  color: #1e293b;
+  margin: 0 0 2rem 0;
   text-align: center;
-  position: relative;
-  padding-bottom: 15px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-}
-
-.upload-title::after {
-  display: none;
-}
-
-.upload-title span {
-  display: block;
-  font-size: 1rem;
-  color: #666;
-  text-transform: none;
-  letter-spacing: 0;
-  margin-top: 8px;
-  font-weight: 400;
-}
-
-.brand-name {
-  color: #144b7d;
-  font-weight: 700;
-  background: linear-gradient(120deg, #144b7d, #2575b9);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  padding: 0 4px;
-  position: relative;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.5px;
-}
-
-.brand-name::after {
-  content: 'NOTE2BRAIN';
-  position: absolute;
-  left: 4px;
-  top: 0;
-  color: rgba(20, 75, 125, 0.1);
-  z-index: -1;
-  filter: blur(1.5px);
+  letter-spacing: 1px;
 }
 
 .upload-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .file-upload-area {
-  border: 2px dashed rgba(20, 75, 125, 0.2);
+  border: 2px dashed #cbd5e1;
   border-radius: 12px;
-  padding: 2.5rem;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  padding: 2rem;
+  transition: all 0.3s ease;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 120px;
-  background: linear-gradient(to bottom, #ffffff, #fafbfc);
+  min-height: 150px;
+  background-color: #f8fafc;
+  cursor: pointer; /* ทำให้เมาส์เป็นรูปมือ */
 }
 
 .file-input {
-  font-size: 0;  /* ซ่อนข้อความ No files chosen */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   opacity: 0;
-  cursor: pointer;
 }
 
-/* เพิ่มข้อความ Choose files แทนที่ file-selector-button */
 .file-upload-area::before {
-  content: 'Choose files';
-  color: #144b7d;
-  font-size: 1rem;
+  content: 'Choose a PDF file';
+  color: #475569;
+  font-size: 1.3rem;
   font-weight: 500;
   position: absolute;
   pointer-events: none;
   transition: all 0.3s ease;
 }
 
+.file-upload-area:hover {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+}
+
 .file-upload-area:hover::before {
-  color: #2575b9;
+  color: #3b82f6;
 }
 
+/* --- ✨ [FIX] ปรับปรุงส่วนของ Animation ทั้งหมด --- */
 .file-upload-area.has-file {
-  border-color: #144b7d;
-  border-style: solid;
-  background: linear-gradient(to bottom, #ffffff, #f8fafc);
+  border-color: transparent;
+  padding: 0; /* เอา padding ออกเพื่อให้ animation ชิดขอบ */
 }
 
+/* ::before คือกรอบด้านในที่แสดงชื่อไฟล์ */
 .file-upload-area.has-file::before {
   content: attr(data-file-name);
-  opacity: 0.8;
+  color: #1e293b;
+  font-weight: 600;
+  
+  position: absolute;
+  z-index: 2;
+  inset: 3px; /* ความหนาของขอบไฟ */
+  
+  background-color: #f8fafc;
+  border-radius: 10px; /* ขอบมนด้านใน */
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem; /* เพิ่ม padding กลับเข้ามาในนี้แทน */
 }
+
+/* ::after คือแสงไฟที่วิ่งอยู่ข้างหลัง */
+.file-upload-area.has-file::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: 12px;
+  background: conic-gradient(
+    from var(--angle),
+    transparent 0%,
+    transparent 50%,
+    #3b82f6 80%,
+    #60a5fa 95%,
+    transparent 100%
+  );
+  animation: border-scanner 4s linear infinite;
+}
+
+@keyframes border-scanner {
+  to {
+    --angle: 360deg;
+  }
+}
+/* --- จบส่วนของ Animation --- */
 
 .submit-button {
   width: 100%;
-  padding: 0.8rem;
-  border-radius: 8px;
+  padding: 0.9rem;
+  border-radius: 10px;
   border: none;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.25);
   position: relative;
   overflow: hidden;
-  background: #144b7d;
-  color: white;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .submit-button:disabled {
-  background: #ccc;
+  background: #9ca3af;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-.submit-button:not(:disabled) {
-  animation: pulseSuccess 0.5s ease;
+.submit-button:not(:disabled):hover {
+  transform: translateY(-3px);
+  box-shadow: 0 7px 20px rgba(59, 130, 246, 0.35);
 }
 
 .submit-button:not(:disabled)::before {
   content: '';
   position: absolute;
-  left: 0;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-      45deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent
+  background-image: linear-gradient(
+    100deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 70%
   );
-  transform: translateX(-100%);
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes pulseSuccess {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(20, 75, 125, 0.3);
-  }
-  70% {
-    transform: scale(1.02);
-    box-shadow: 0 0 0 10px rgba(20, 75, 125, 0);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(20, 75, 125, 0);
-  }
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 2.5s linear infinite;
 }
 
 @keyframes shimmer {
-  100% {
-    transform: translateX(100%);
+  from {
+    background-position: -100% 0;
+  }
+  to {
+    background-position: 100% 0;
   }
 }
 
-/* ปรับปุ่ม back to home */
-.logout-btn {
-    position: relative;
-    background: #f5f5f5;
-    border: none;
-    border-radius: 15px;
-    padding: 0.8rem 1.6rem 0.8rem 1rem; /* ปรับ padding ด้านขวาให้น้อยลง */
-    font-weight: 500;
-    cursor: pointer;
-    font-size: 15px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* เพิ่มเงาให้เข้มขึ้น */
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    color: #144b7d;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.logout-btn::before {
-    content: "←"; /* เพิ่มลูกศร */
-    font-size: 18px;
-}
-
-.logout-btn:hover {
-    background: #144b7d;
-    color: white;
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(20, 75, 125, 0.5); /* เพิ่มเงาตอน hover */
-}
-
-/* ปรับ hover effect */
-.submit-button:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(20, 75, 125, 0.3);
-    background: #144b7d;  /* คงสีเดิมไว้ */
-}

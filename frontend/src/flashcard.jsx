@@ -10,18 +10,21 @@ export default function Flashcard() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [direction, setDirection] = useState(''); // 'next' or 'prev'
+  const [direction, setDirection] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   const generateFlashcards = useCallback(async () => {
     if (!id) {
-      setError('ไม่พบ document ID');
+      setError('Document ID not found');
       return;
     }
 
     setLoading(true);
     setError('');
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch('http://localhost:8000/flashcards/generate', {
         method: 'POST',
         headers: {
@@ -29,8 +32,11 @@ export default function Flashcard() {
         },
         body: JSON.stringify({
           document_id: id
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -42,7 +48,11 @@ export default function Flashcard() {
       setIsFlipped(false);
     } catch (error) {
       console.error('Error generating flashcards:', error);
-      setError('ไม่สามารถสร้าง flashcard ได้');
+      if (error.name === 'AbortError') {
+        setError('Request timeout - Backend server might be slow or not responding');
+      } else {
+        setError('Unable to generate flashcards - Please check if backend server is running');
+      }
     } finally {
       setLoading(false);
     }
@@ -119,10 +129,10 @@ export default function Flashcard() {
 
   if (loading) {
     return (
-      <div className="flashcard-container">
+      <div className="flashcard-container page-transition">
         <div className="loading-spinner">
           <div className="spinner"></div>
-          <p>กำลังสร้าง flashcard...</p>
+          <p>Generating flashcards...</p>
         </div>
       </div>
     );
@@ -130,17 +140,17 @@ export default function Flashcard() {
 
   if (error) {
     return (
-      <div className="flashcard-container">
+      <div className="flashcard-container page-transition">
         <div className="error-box">
-          <h2>เกิดข้อผิดพลาด</h2>
+          <h2>Error Occurred</h2>
           <p>{error}</p>
           <div className="error-actions">
             <button onClick={generateFlashcards} className="btn-generate">
-              ลองใหม่
+              Try Again
             </button>
             {id && (
               <button onClick={() => navigate(`/document/${id}`)} className="btn-secondary">
-                กลับไปหน้าเอกสาร
+                Back to Document
               </button>
             )}
           </div>
@@ -151,16 +161,16 @@ export default function Flashcard() {
 
   if (flashcards.length === 0) {
     return (
-      <div className="flashcard-container">
+      <div className="flashcard-container page-transition">
         <div className="empty-state">
           <h1>Flashcard</h1>
-          <p>ยังไม่มี flashcard สำหรับเอกสารนี้</p>
+          <p>No flashcards available for this document</p>
           <button onClick={generateFlashcards} className="btn-generate">
-            สร้าง Flashcard
+            Generate Flashcards
           </button>
           {id && (
             <button onClick={() => navigate(`/document/${id}`)} className="btn-secondary">
-              กลับไปหน้าเอกสาร
+              Back to Document
             </button>
           )}
         </div>
@@ -172,10 +182,10 @@ export default function Flashcard() {
   const progress = ((currentCard + 1) / flashcards.length) * 100;
 
   return (
-    <div className="flashcard-container">
+    <div className="flashcard-container page-transition">
       <div className="flashcard-header">
         <button onClick={() => navigate(`/document/${id}`)} className="btn-back">
-          กลับ
+          Back
         </button>
         <h1>Flashcard</h1>
         <div className="spacer"></div>
@@ -186,7 +196,7 @@ export default function Flashcard() {
       </div>
       
       <div className="card-counter">
-        การ์ดที่ {currentCard + 1} จาก {flashcards.length}
+        Card {currentCard + 1} of {flashcards.length}
       </div>
 
       <div className="card-wrapper">
@@ -196,18 +206,18 @@ export default function Flashcard() {
         >
           <div className="card-inner">
             <div className="card-front">
-              <div className="card-label">คำถาม</div>
+              <div className="card-label">Question</div>
               <div className="card-content">
                 <p>{card.question}</p>
               </div>
-              <div className="card-hint">คลิกเพื่อดูคำตอบ</div>
+              <div className="card-hint">Click to see answer</div>
             </div>
             <div className="card-back">
-              <div className="card-label">คำตอบ</div>
+              <div className="card-label">Answer</div>
               <div className="card-content">
                 <p>{card.answer}</p>
               </div>
-              <div className="card-hint">คลิกเพื่อดูคำถาม</div>
+              <div className="card-hint">Click to see question</div>
             </div>
           </div>
         </div>
@@ -218,32 +228,32 @@ export default function Flashcard() {
           onClick={prevCard} 
           disabled={currentCard === 0 || isTransitioning}
           className="btn-nav"
-          aria-label="การ์ดก่อนหน้า"
+          aria-label="Previous card"
         >
-          <span className="btn-text">ก่อนหน้า</span>
+          <span className="btn-text">Previous</span>
         </button>
         
         <button onClick={flipCard} className="btn-flip" disabled={isTransitioning}>
-          {isFlipped ? 'ดูคำถาม' : 'ดูคำตอบ'}
+          {isFlipped ? 'Show Question' : 'Show Answer'}
         </button>
         
         <button 
           onClick={nextCard} 
           disabled={currentCard === flashcards.length - 1 || isTransitioning}
           className="btn-nav"
-          aria-label="การ์ดถัดไป"
+          aria-label="Next card"
         >
-          <span className="btn-text">ถัดไป</span>
+          <span className="btn-text">Next</span>
         </button>
       </div>
 
       <div className="keyboard-hint">
-        เคล็ดลับ: ใช้ลูกศร ← → เพื่อเปลี่ยนการ์ด และ Space/Enter เพื่อพลิกการ์ด
+        Tip: Use ← → arrows to navigate cards, and Space/Enter to flip cards
       </div>
 
       <div className="action-controls">
         <button onClick={generateFlashcards} className="btn-regenerate" disabled={isTransitioning}>
-          สร้างใหม่
+          Regenerate
         </button>
       </div>
     </div>

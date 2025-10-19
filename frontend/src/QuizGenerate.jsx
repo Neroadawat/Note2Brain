@@ -1,88 +1,70 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // เพิ่ม import
-import "./QuizGenerate.css";
+import React, { useState } from 'react';
+import './QuizGenerate.css';
 
+export default function QuizGenerate({ isOpen, onClose, onCreateQuiz, documentName }) {
+  const [difficulty, setDifficulty] = useState('Easy');
+  // ✨ ตั้งค่าเริ่มต้นให้เป็น 1 หรือค่าอื่นที่เหมาะสม
+  const [numQuestions, setNumQuestions] = useState(10); 
 
-export default function QuizGenrate({ document, onClose, onCreated }) {
-  const [difficulty, setDifficulty] = useState("medium");
-  const [questionCount, setQuestionCount] = useState(5);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // เพิ่ม useNavigate
+  if (!isOpen) {
+    return null;
+  }
 
-  const handleSubmit = async () => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("กรุณาเข้าสู่ระบบก่อน");
-      navigate("/login");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const res = await fetch(`http://localhost:8000/generate-quiz?user_id=${userId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_id: document.id,
-          difficulty,
-          question_count: Number(questionCount),
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "สร้างควิซไม่สำเร็จ");
-
-      alert("✅ สร้างควิซสำเร็จ!");
-      onClose(); 
-      onCreated(data.quiz_id); 
-      
-    } catch (err) {
-      alert("❌ " + err.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleCreateClick = () => {
+    // ตรวจสอบอีกครั้งว่าค่าไม่ต่ำกว่า 1 ก่อนส่ง
+    const finalNumQuestions = Math.max(1, Number(numQuestions));
+    onCreateQuiz({ difficulty, numQuestions: finalNumQuestions });
+    onClose();
   };
 
-  return (
-    <div className="quiz-modal-overlay">
-      <div className="quiz-modal-content">
-        <h2>สร้าง Quiz จากเอกสารนี้</h2>
-        <p className="doc-name">{document.filename}</p>
+  const handleNumChange = (e) => {
+    // ป้องกันการใส่ค่าว่างหรือค่าที่ไม่ใช่ตัวเลข
+    const value = e.target.value;
+    setNumQuestions(value === '' ? '' : Number(value));
+  };
 
+
+  return (
+    <div className="quiz-modal-overlay" onClick={onClose}>
+      <div className="quiz-modal-content" onClick={(e) => e.stopPropagation()}>
+        <h2>Setup Quiz</h2>
+        <p className="doc-name">Document: {documentName}</p>
+        
         <div className="quiz-form-group">
-          <label>ระดับความยาก:</label>
-          <select
-            value={difficulty}
+          <label htmlFor="difficulty">Difficulty Level</label>
+          <select 
+            id="difficulty" 
+            value={difficulty} 
             onChange={(e) => setDifficulty(e.target.value)}
           >
-            <option value="easy">ง่าย (Easy)</option>
-            <option value="medium">ปานกลาง (Medium)</option>
-            <option value="hard">ยาก (Hard)</option>
+            <option value="Easy">Easy</option>
+            <option value="Medium">Medium</option>
+            <option value="Hard">Hard</option>
           </select>
         </div>
 
         <div className="quiz-form-group">
-          <label>จำนวนคำถาม:</label>
-          <input
-            type="number"
-            min="1"
-            max="20"
-            value={questionCount}
-            onChange={(e) => setQuestionCount(e.target.value)}
+          <label htmlFor="numQuestions">Number of Questions</label>
+          {/* ✨ [แก้ไข] เปลี่ยน min เป็น 1 และลบ max ออก */}
+          <input 
+            type="number" 
+            id="numQuestions" 
+            value={numQuestions}
+            onChange={handleNumChange}
+            min="1" // ห้ามน้อยกว่า 1
+            // ไม่มี max attribute อีกต่อไป
           />
         </div>
 
         <div className="quiz-modal-actions">
-          <button className="cancel-btn" onClick={onClose}>
-            ยกเลิก
-          </button>
-          <button
-            className="create-btn"
-            onClick={handleSubmit}
-            disabled={loading}
+          <button className="cancel-btn" onClick={onClose}>Cancel</button>
+          {/* ป้องกันการกดสร้างถ้ายังไม่ได้ใส่จำนวนข้อ */}
+          <button 
+            className="create-btn" 
+            onClick={handleCreateClick}
+            disabled={!numQuestions || Number(numQuestions) < 1}
           >
-            {loading ? "กำลังสร้าง..." : "สร้าง Quiz"}
+            Create Quiz
           </button>
         </div>
       </div>

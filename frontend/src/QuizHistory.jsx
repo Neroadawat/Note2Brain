@@ -31,30 +31,23 @@ export default function QuizHistory() {
     setQuizHistory([]);
   };
 
-  // ✨ 1. เพิ่มฟังก์ชันสำหรับจัดการปุ่มต่างๆ
   const handleDeleteItem = (itemId) => {
-    // กรองเอาเฉพาะรายการที่ไม่ตรงกับ id ที่ต้องการลบ
     const updatedHistory = quizHistory.filter(item => item.id !== itemId);
-    // อัปเดต State เพื่อให้หน้าจอเปลี่ยนแปลง
     setQuizHistory(updatedHistory);
-    // บันทึกข้อมูลที่อัปเดตแล้วลง localStorage
     localStorage.setItem('quizHistory', JSON.stringify(updatedHistory));
   };
 
   const handleRetryQuiz = (documentId) => {
-    // นำทางไปยังหน้าทำควิซของเอกสารนั้นๆ
     navigate(`/document/${documentId}/quiz`);
   };
 
   const handleViewResult = (quizItem) => {
-    // เตรียมข้อมูลที่จะส่งไปให้หน้าแสดงผล
     const resultData = {
       score: quizItem.score,
       totalQuestions: quizItem.totalQuestions,
       documentName: quizItem.documentName,
-      answeredCount: quizItem.totalQuestions // สมมติว่าตอบครบทุกข้อ
+      answeredCount: quizItem.totalQuestions
     };
-    // นำทางไปยังหน้าผลลัพธ์ พร้อมส่งข้อมูลไปด้วย
     navigate(`/quiz/${quizItem.documentId}/result`, { state: resultData });
   };
 
@@ -76,7 +69,7 @@ export default function QuizHistory() {
           <p className="empty-description">
             It looks like you haven't taken any quizzes yet. Start learning and test your knowledge!
           </p>
-          <button className="empty-btn" onClick={() => navigate('/')}>
+          <button className="empty-btn" onClick={() => navigate('/home')}>
             Explore Documents
           </button>
         </div>
@@ -139,7 +132,6 @@ export default function QuizHistory() {
                 </div>
               </div>
               <footer className="history-card-footer">
-                {/* ✨ 2. เพิ่ม onClick ให้กับปุ่มทั้งหมด */}
                 <button className="history-action-btn view-btn" onClick={() => handleViewResult(item)}>
                   <View size={16} /> View
                 </button>
@@ -157,3 +149,4 @@ export default function QuizHistory() {
     </div>
   );
 }
+

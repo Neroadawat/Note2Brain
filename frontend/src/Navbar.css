@@ -1,0 +1,137 @@
+/* --- Main Navbar Frame --- */
+.navbar-header {
+  background: #0a192f;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background-color: rgba(10, 25, 47, 0.85);
+  transition: background-color 0.3s ease;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 40px;
+  box-sizing: border-box;
+  height: 64px;
+}
+
+/* --- Logo / App Name --- */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.02);
+}
+
+/* Keyframes for color animation */
+@keyframes tech-glow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Styles for the logo text in both states */
+.logo-animated, .logo-static {
+  transition: all 0.5s ease-in-out; /* Smooth transition between states */
+}
+
+/* 1. Logo style with shimmer */
+.logo-animated {
+  background: linear-gradient(270deg, #00c6ff, #3b82f6, #9333ea, #3b82f6, #00c6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  background-size: 400% 400%;
+  animation: tech-glow 6s ease-in-out infinite;
+}
+
+/* ✨ [CORRECTED] 2. Logo style when static (white) */
+.navbar-brand span.logo-static {
+  color: #ffffff; /* Use a more specific selector */
+  background: none;
+  -webkit-background-clip: unset; /* Reset the clipping properties */
+  background-clip: unset;
+  animation: none;
+}
+
+
+/* --- Menu and Links --- */
+.navbar-right-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar-item {
+  font-family: 'Inter', sans-serif;
+  color: #8892b0;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, border 0.3s ease;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  border: 1px solid transparent; /* Add a transparent border to prevent layout shift */
+  cursor: pointer;
+  position: relative; 
+  overflow: hidden;   
+}
+
+.navbar-item:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #ccd6f6;
+  transform: translateY(-2px);
+}
+
+.navbar-item.active {
+  transform: translateY(-2px);
+  background-color: rgba(59, 130, 246, 0.1); /* Subtle background glow */
+  border: 1px solid #3b82f6; /* Added the border */
+  
+  /* Shimmer effect for text */
+  background-image: linear-gradient(270deg, #00c6ff, #3b82f6, #9333ea, #3b82f6, #00c6ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  
+  background-size: 400% 400%;
+  animation: tech-glow 6s ease-in-out infinite;
+}
+
+
+/* --- Logout Button --- */
+.navbar-logout-btn {
+  font-family: 'Inter', sans-serif;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  background: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #ff7b72;
+  border: 1px solid #ff7b72;
+  margin-left: 12px;
+}
+
+.navbar-logout-btn:hover {
+  background-color: rgba(255, 123, 114, 0.1);
+  color: #ff9a94;
+  border-color: #ff9a94;
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 4px 15px rgba(255, 123, 114, 0.1);
+}

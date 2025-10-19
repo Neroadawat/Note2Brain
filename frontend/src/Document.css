@@ -29,6 +29,13 @@
   margin: 0;
 }
 
+.home-section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
 /* --- ✨ UPGRADED BUTTON STYLES (APPLIES TO ALL BUTTONS) --- */
 .back-btn,
 .simple-button {

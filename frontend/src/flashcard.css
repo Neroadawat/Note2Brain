@@ -15,37 +15,45 @@
   animation: fadeInDown 0.6s ease-out;
 }
 
+/* ✨ [EDIT] Added a gradient and shadow to the title */
 .flashcard-header h1 {
   margin: 0;
   font-size: 38px;
-  color: #1a1a2e;
   font-weight: 700;
   letter-spacing: 1px;
-  text-shadow: none;
+  /* Gradient text effect */
+  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(30, 64, 175, 0.1);
 }
 
+/* ✨ [EDIT] Changed the color and style of the back button */
 .btn-back {
   padding: 10px 24px;
-  background: #f5f5f5;
-  color: #1a1a2e;
-  border: 1px solid #e0e0e0;
+  background: #eff6ff; /* Light blue background */
+  color: #1e40af; /* Dark blue text */
+  border: 1px solid #dbeafe; /* Light blue border */
   border-radius: 8px;
   cursor: pointer;
   font-size: 15px;
-  font-weight: 500;
+  font-weight: 600; /* Made font a bit bolder */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-back:hover {
-  background: #e8e8e8;
-  border-color: #d0d0d0;
+  background: #dbeafe; /* Slightly darker blue on hover */
+  border-color: #bfdbfe;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15); /* Blue shadow */
 }
 
 .btn-back:active {
   transform: translateY(0);
 }
+
 
 .spacer {
   width: 100px;

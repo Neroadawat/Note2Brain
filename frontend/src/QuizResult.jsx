@@ -1,14 +1,13 @@
 import React from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BookOpen, LayoutGrid, CheckCircle2, XCircle, FileText } from 'lucide-react';
-import './QuizResult.css'; // ต้องมีไฟล์ CSS สำหรับหน้านี้
+import './QuizResult.css';
 
 export default function QuizResult() {
   const location = useLocation();
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // ดึงข้อมูลคะแนนที่ส่งมาจากหน้า Quiz
   const { score, totalQuestions, answeredCount, documentName } = location.state || {
     score: 0,
     totalQuestions: 0,

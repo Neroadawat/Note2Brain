@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './UploadOCR.css';
 import { useNavigate } from "react-router-dom";
-import "./Document.css"; // ใช้ style summary เดียวกับ Document
+import "./Document.css";
 
 export default function UploadOCR() {
   const [file, setFile] = useState(null);
@@ -9,6 +9,7 @@ export default function UploadOCR() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
@@ -17,7 +18,7 @@ export default function UploadOCR() {
     } else {
         setFile(null);
     }
-};
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,34 +56,34 @@ export default function UploadOCR() {
   };
 
   return (
-    <div className="upload-container">
+    <div className="upload-container page-transition">
       <div className="upload-card">
-        <header className="home-header" style={{ position: "relative", marginBottom: 16 }}>
-          <img src="/logo.png" alt="logo" className="home-logo" />
-          <button className="logout-btn" onClick={() => navigate("/home")}>
-            Home
-          </button>
-        </header>
-        <hr className="home-divider" />
-
+        <div className="upload-header">
+          <img src="/logo.png" alt="logo" className="upload-logo" />
+        </div>
         <h1 className="upload-title">
-          OCR PDF EXTRACTOR
+          PDF EXTRACTOR
         </h1>
 
         <form onSubmit={handleSubmit} className="upload-form">
-          <div 
+          <label 
+            htmlFor="file-input"
             className={`file-upload-area ${file ? 'has-file' : ''}`}
             data-file-name={file ? file.name : ''}
           >
             <input
+              id="file-input"
               type="file"
               accept=".pdf"
               onChange={handleFileChange}
               className="file-input"
+              ref={fileInputRef}
+              onClick={(e) => { 
+                e.currentTarget.value = null
+              }}
             />
-          </div>
+          </label>
 
-          {/* แสดงปุ่ม Extract Text เสมอ แต่ disable ถ้ายังไม่มีไฟล์ หรือกำลัง loading */}
           <button
             type="submit"
             disabled={!file || loading}
@@ -92,7 +93,6 @@ export default function UploadOCR() {
           </button>
         </form>
 
-        {/* แสดง summary ถ้ามี result */}
         {result && (
           <div className="result-section">
             <div className="summary-section">

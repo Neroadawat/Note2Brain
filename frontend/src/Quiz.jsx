@@ -1,29 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import "./Document.css";
 import "./Quiz.css";
 
 export default function Quiz() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const navigate = useNavigate();
 
   useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const difficulty = queryParams.get('difficulty') || 'Easy';
+    const numQuestions = queryParams.get('questions') || 10;
+
     const fetchQuiz = async () => {
       const mockData = {
         documentName: "Sample Document",
         questions: [
-          { id: 1, question: "What is React?", optionA: "A JavaScript library for building user interfaces", optionB: "A programming language", optionC: "A database management system", optionD: "An operating system", correctAnswer: "A" },
+          { id: 1, question: "โครงการ SAI TALK ปี 2568 จัดขึ้นโดยหน่วยงานใด?", optionA: "ชมรมพัฒนาซอฟต์แวร์ นวัตกรรมและปัญญาประดิษฐ์ มหาวิทยาลัยธรรมศาสตร์", optionB: "คณะวิทยาศาสตร์ มหาวิทยาลัยธรรมศาสตร์", optionC: "สำนักงานส่งเสริมเศรษฐกิจดิจิทัล มหาวิทยาลัยธรรมศาสตร์", optionD: "บริษัท SAI TALK จำกัด", correctAnswer: "A" },
           { id: 2, question: "What does JSX stand for?", optionA: "JavaScript XML", optionB: "Java Syntax Extension", optionC: "JavaScript Extension", optionD: "Java XML", correctAnswer: "A" }
         ]
       };
 
       try {
-        const res = await fetch(`http://localhost:8000/document/${id}/quiz`);
+        const res = await fetch(`http://localhost:8000/document/${id}/quiz?difficulty=${difficulty}&questions=${numQuestions}`);
         const data = await res.json();
         if (data && data.questions && data.questions.length > 0) {
           setQuiz(data);
@@ -38,7 +43,7 @@ export default function Quiz() {
       }
     };
     fetchQuiz();
-  }, [id]);
+  }, [id, location.search]);
 
   const handleAnswerChange = (answer) => {
     setSelectedAnswers({ ...selectedAnswers, [currentQuestion]: answer });
@@ -78,14 +83,12 @@ export default function Quiz() {
     const score = Math.floor((correctAnswersCount / totalQuestions) * 100);
     const answeredCount = Object.keys(selectedAnswers).length;
     
-    // ✨ เพิ่มส่วนบันทึกข้อมูลกลับเข้ามา
     const newHistoryEntry = {
       id: Date.now(),
       documentId: id,
       documentName: quiz.documentName,
       score: score,
       totalQuestions: totalQuestions,
-      // คุณอาจจะอยากบันทึกจำนวนข้อที่ตอบถูก (correctAnswersCount) ด้วย
       date: new Date().toISOString(),
     };
 
@@ -93,12 +96,10 @@ export default function Quiz() {
       const existingHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
       existingHistory.unshift(newHistoryEntry);
       localStorage.setItem('quizHistory', JSON.stringify(existingHistory));
-      console.log('Quiz history saved successfully!');
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
     
-    // ไปหน้าแสดงผลพร้อมข้อมูลที่ถูกต้อง
     navigate(`/quiz/${id}/result`, { 
       state: { 
         score, 
@@ -118,20 +119,20 @@ export default function Quiz() {
   const allAnswered = Object.keys(selectedAnswers).length === totalQuestions;
 
   return (
-    // ... ส่วน JSX ของคุณเหมือนเดิม ไม่ต้องแก้ไข ...
     <div className="home-root">
-      <header className="home-header" style={{ position: "relative" }}>
-        <img src="/logo.png" alt="logo" className="home-logo" />
-        <span className="home-title">note2brain</span>
-        <button className="back-btn" onClick={() => navigate(`/document/${id}`)}>
-          Back
-        </button>
-      </header>
-      <hr className="home-divider" />
-      <main className="home-main">
-        <div className="quiz-section">
+      <main className="quiz-main">
+        <div className="quiz-section page-transition">
           <div className={`quiz-question-card ${isTransitioning ? 'transitioning' : ''}`}>
+            
+            <div className="quiz-card-header">
+              <button className="quiz-back-btn" onClick={() => navigate(`/document/${id}`)}>
+                ‹ Back
+              </button>
+            </div>
+            
             <div className="quiz-question-box">
+              <div className="quiz-question">{currentQ.question}</div>
+              
               <div className="quiz-navigation">
                 <button 
                   className="quiz-nav-btn quiz-nav-prev" 
@@ -145,9 +146,10 @@ export default function Quiz() {
                   <span className="divider">/</span>
                   <span className="total-number">{totalQuestions}</span>
                 </span>
+                
                 {isLastQuestion && allAnswered ? (
                   <button 
-                    className="quiz-submit-btn" 
+                    className="quiz-submit-btn"
                     onClick={handleSubmit}
                     disabled={isTransitioning}
                   >
@@ -157,14 +159,14 @@ export default function Quiz() {
                   <button 
                     className="quiz-nav-btn quiz-nav-next" 
                     onClick={handleNext}
-                    disabled={isLastQuestion || isTransitioning}
+                    disabled={(isLastQuestion && !allAnswered) || isTransitioning}
                   >
                     <span className="nav-arrow">›</span>
                   </button>
                 )}
               </div>
-              <div className="quiz-question">{currentQ.question}</div>
             </div>
+
             <div className="quiz-options">
               {['A', 'B', 'C', 'D'].map((option) => (
                 <label 
@@ -178,11 +180,8 @@ export default function Quiz() {
                     checked={selectedAnswers[currentQuestion] === option}
                     onChange={() => handleAnswerChange(option)}
                   />
-                  <span className="option-content">
-                    <span className="option-number">{option}</span>
-                    <span className="option-text">{currentQ[`option${option}`]}</span>
-                  </span>
-                  <span className="option-check"></span>
+                  <span className="option-number">{option}</span>
+                  <span className="option-text">{currentQ[`option${option}`]}</span>
                 </label>
               ))}
             </div>
