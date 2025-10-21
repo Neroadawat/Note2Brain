@@ -1,17 +1,24 @@
-# conftest.py
+# backend/tests/conftest.py
 import sys
 from pathlib import Path
 import types
 import pytest
 from importlib import import_module
 
-# เพิ่ม backend root เข้า sys.path ก่อน import app/db
-ROOT = Path(__file__).resolve().parents[1]
+# เพิ่ม backend folder (root ของ backend) ลงใน sys.path ก่อน import โมดูลภายใน backend
+ROOT = Path(__file__).resolve().parents[1]  # backend/
 sys.path.insert(0, str(ROOT))
 
-# นำเข้า app (FastAPI instance) และฟังก์ชันของ db เพื่อใช้เป็น key ใน dependency_overrides
-from app import app
-from db import get_prisma  # ใช้เพื่อ set app.dependency_overrides key
+# นำเข้า app (FastAPI instance) และ get_prisma จาก db
+try:
+    from app import app
+except Exception as e:
+    raise ImportError(f"ไม่สามารถ import FastAPI app ได้: {e}")
+
+try:
+    from db import get_prisma
+except Exception as e:
+    raise ImportError(f"ไม่สามารถ import db.get_prisma ได้: {e}")
 
 
 @pytest.fixture
@@ -23,13 +30,15 @@ def fake_prisma():
 
         async def find_unique(self, where):
             # คืนค่า object หรือ None เหมือน prisma user
-            return self._users.get(where.get("email"))
+            # where อาจเป็น {"email": "..."} หรือ {"id": ...}
+            key = where.get("email") or where.get("id")
+            return self._users.get(key)
 
         async def create(self, data):
             user = types.SimpleNamespace(
                 id=self._id,
                 email=data["email"],
-                hashedPassword=data["hashedPassword"]
+                hashedPassword=data.get("hashedPassword") or data.get("hashed_password")
             )
             self._users[user.email] = user
             self._id += 1
@@ -66,12 +75,52 @@ def fake_prisma():
             if where and "ownerId" in where:
                 owner = where["ownerId"]
                 docs = [d for d in docs if d.get("ownerId") == owner]
-            # สามารถรองรับ order ถ้าต้องการ (ตอนนี้ไม่จำเป็น)
             return docs
 
         async def find_unique(self, where):
+            """
+            find_unique มักใช้กับ unique key เช่น id หรือ filename
+            คืน dict (เหมือน create) เพื่อความเข้ากันกับเทสต์อื่น
+            """
             doc_id = where.get("id")
-            return self._docs.get(doc_id)
+            if doc_id is not None:
+                return self._docs.get(str(doc_id))
+            filename = where.get("filename")
+            if filename:
+                for d in self._docs.values():
+                    if d.get("filename") == filename:
+                        return d
+            return None
+
+        async def find_first(self, where=None):
+            """
+            Emulate prisma.find_first(where={...}) BUT คืน object ที่มี attribute
+            (types.SimpleNamespace) เพราะโค้ดในบาง endpoint จะเข้าถึง document.summary
+            """
+            if not where:
+                first = next(iter(self._docs.values()), None)
+                return types.SimpleNamespace(**first) if first is not None else None
+
+            doc_id = where.get("id")
+            owner = where.get("ownerId")
+
+            if doc_id is not None:
+                doc = self._docs.get(str(doc_id))
+                if doc is None:
+                    return None
+                if owner is not None and doc.get("ownerId") != owner:
+                    return None
+                return types.SimpleNamespace(**doc)
+
+            if owner is not None:
+                for d in self._docs.values():
+                    if d.get("ownerId") == owner:
+                        return types.SimpleNamespace(**d)
+                return None
+
+            # fallback: คืน first as namespace
+            first = next(iter(self._docs.values()), None)
+            return types.SimpleNamespace(**first) if first is not None else None
 
     class FakePrisma:
         def __init__(self):
@@ -97,6 +146,9 @@ def override_get_prisma(fake_prisma):
     async def _get_prisma():
         return fake_prisma
 
+    # เก็บค่าเดิมของ dependency_overrides เพื่อ restore คืนใน finally
+    original_overrides = dict(app.dependency_overrides)
+
     # 1) override FastAPI dependency
     app.dependency_overrides[get_prisma] = _get_prisma
 
@@ -105,26 +157,32 @@ def override_get_prisma(fake_prisma):
 
     try:
         # patch โมดูล db โดยตรง
-        db_mod = import_module("db")
-        if hasattr(db_mod, "get_prisma"):
-            original = getattr(db_mod, "get_prisma")
-            patched.append((db_mod, original))
-            setattr(db_mod, "get_prisma", _get_prisma)
-        else:
-            # ถ้าไม่มี attribute เดิม ให้สร้าง attribute ใหม่แล้วบันทึก original เป็น None
-            patched.append((db_mod, None))
-            setattr(db_mod, "get_prisma", _get_prisma)
+        try:
+            db_mod = import_module("db")
+        except ModuleNotFoundError:
+            db_mod = None
+
+        if db_mod is not None:
+            if hasattr(db_mod, "get_prisma"):
+                original = getattr(db_mod, "get_prisma")
+                patched.append((db_mod, original))
+                setattr(db_mod, "get_prisma", _get_prisma)
+            else:
+                patched.append((db_mod, None))
+                setattr(db_mod, "get_prisma", _get_prisma)
 
         # patch โมดูลอื่น ๆ ที่อาจ import get_prisma ไว้ (เช่น main, app, routes)
-        # จะตรวจทุกโมดูลที่โหลดใน sys.modules และแทนเฉพาะถ้า attribute มีอยู่จริงและยังไม่ถูกแทนด้วย _get_prisma
         for name, module in list(sys.modules.items()):
             if module is None:
                 continue
             # ข้ามตัว db ที่ patch แล้ว
-            if module is db_mod:
+            if db_mod is not None and module is db_mod:
                 continue
             if hasattr(module, "get_prisma"):
-                cur = getattr(module, "get_prisma")
+                try:
+                    cur = getattr(module, "get_prisma")
+                except Exception:
+                    continue
                 # อย่าแทนถ้ามันอยู่แล้วเป็นฟังก์ชันเรา
                 if cur is not _get_prisma:
                     patched.append((module, cur))
@@ -137,8 +195,10 @@ def override_get_prisma(fake_prisma):
         yield
 
     finally:
-        # restore app overrides
+        # restore app overrides (คืนค่าเดิมทั้งหมด)
         app.dependency_overrides.clear()
+        app.dependency_overrides.update(original_overrides)
+
         # คืนค่าทุกโมดูลที่เรา patch
         for module, original in patched:
             try:
