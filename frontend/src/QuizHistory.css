@@ -17,16 +17,6 @@
   --bg-light: #f8fafc;
 }
 
-/* Global body style (should be in index.css) */
-body {
-  background-color: var(--deep-blue);
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-  font-family: 'Inter', sans-serif;
-}
-
 /* ==============================================
    Main Container & Header
    ============================================== */
@@ -164,13 +154,12 @@ body {
   overflow: hidden;
 }
 
-/* ✨ [EDIT] Changed the solid color to a gradient */
 .history-progress-fill {
   height: 100%;
   border-radius: 4px;
   background: linear-gradient(90deg, #60a5fa 0%, var(--primary-blue) 100%);
   transition: width 1s ease-in-out;
-  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3); /* Optional: Adds a nice glow */
+  box-shadow: 0 2px 5px rgba(59, 130, 246, 0.3);
 }
 
 

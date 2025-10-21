@@ -1,52 +1,78 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom";
-import "./Document.css";
+import { useParams, useNavigate } from "react-router-dom"; // ✨ [แก้ไข] ลบ useLocation ที่ไม่ใช้ออก
+import "./Document.css"; // ตรวจสอบว่าจำเป็นต้องใช้ CSS นี้หรือไม่
 import "./Quiz.css";
 
 export default function Quiz() {
-  const { id } = useParams();
+  // ✨ [แก้ไข] รับ quizId จาก URL Parameter แทน id เดิม
+  const { quizId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [quiz, setQuiz] = useState(null);
+  const [quizData, setQuizData] = useState(null); // เปลี่ยนชื่อ state เพื่อความชัดเจน
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [selectedAnswers, setSelectedAnswers] = useState({}); // state เก็บคำตอบ { questionId: 'A' }
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const difficulty = queryParams.get('difficulty') || 'Easy';
-    const numQuestions = queryParams.get('questions') || 10;
+    // ✨ [เพิ่ม] Console Log เพื่อเช็ค userId ตอนเริ่มโหลดหน้า Quiz
+    console.log("UserID ON Quiz mount:", localStorage.getItem("userId"));
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      // ✨ [เพิ่ม] Console Error ก่อน Redirect
+      console.error("User not logged in, redirecting...");
+      navigate("/login");
+      return;
+    }
 
-    const fetchQuiz = async () => {
+    const fetchQuizData = async () => {
+      // Mock data ยังคงไว้เป็น fallback เผื่อ API ล่มจริงๆ
       const mockData = {
-        documentName: "Sample Document",
+        documentName: "Fallback Document",
         questions: [
-          { id: 1, question: "โครงการ SAI TALK ปี 2568 จัดขึ้นโดยหน่วยงานใด?", optionA: "ชมรมพัฒนาซอฟต์แวร์ นวัตกรรมและปัญญาประดิษฐ์ มหาวิทยาลัยธรรมศาสตร์", optionB: "คณะวิทยาศาสตร์ มหาวิทยาลัยธรรมศาสตร์", optionC: "สำนักงานส่งเสริมเศรษฐกิจดิจิทัล มหาวิทยาลัยธรรมศาสตร์", optionD: "บริษัท SAI TALK จำกัด", correctAnswer: "A" },
-          { id: 2, question: "What does JSX stand for?", optionA: "JavaScript XML", optionB: "Java Syntax Extension", optionC: "JavaScript Extension", optionD: "Java XML", correctAnswer: "A" }
+          { id: "mock1", question: "Mock Question 1?", optionA: "A1", optionB: "B1", optionC: "C1", optionD: "D1", correctAnswer: "A" },
+          { id: "mock2", question: "Mock Question 2?", optionA: "A2", optionB: "B2", optionC: "C2", optionD: "D2", correctAnswer: "B" }
         ]
-      };
+       };
 
       try {
-        const res = await fetch(`http://localhost:8000/document/${id}/quiz?difficulty=${difficulty}&questions=${numQuestions}`);
-        const data = await res.json();
-        if (data && data.questions && data.questions.length > 0) {
-          setQuiz(data);
+        // ✨ Fetch ข้อมูล Quiz โดยใช้ Endpoint และ quizId ที่ถูกต้อง
+        const res = await fetch(`http://localhost:8000/quiz/${quizId}?user_id=${userId}`);
+        if (!res.ok) {
+           const errorData = await res.json().catch(() => ({ detail: "Quiz not found or access denied." }));
+           throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
+        }
+        const result = await res.json();
+
+        // ✨ ตรวจสอบโครงสร้างข้อมูลที่ Backend ส่งกลับมา
+        if (result.success && result.data && result.data.questions && result.data.questions.length > 0) {
+          setQuizData({
+            documentName: result.data.document?.filename || "Quiz",
+            questions: result.data.questions
+          });
         } else {
-          setQuiz(mockData);
+          console.warn("Received empty or invalid quiz data from API, using mock data.", result);
+          setQuizData(mockData);
         }
       } catch (err) {
-        console.error("Error fetching quiz, using mock data:", err);
-        setQuiz(mockData);
+        console.error("Error fetching quiz data, using mock data:", err);
+        setQuizData(mockData);
       } finally {
         setLoading(false);
       }
     };
-    fetchQuiz();
-  }, [id, location.search]);
 
-  const handleAnswerChange = (answer) => {
-    setSelectedAnswers({ ...selectedAnswers, [currentQuestion]: answer });
+    if (quizId) {
+      fetchQuizData();
+    } else {
+      setLoading(false);
+      console.error("No Quiz ID provided in URL");
+      setQuizData(null);
+    }
+  }, [quizId, navigate]);
+
+  // ✨ เก็บคำตอบโดยใช้ question.id เป็น key
+  const handleAnswerChange = (answerKey, questionId) => {
+    setSelectedAnswers(prev => ({ ...prev, [questionId]: answerKey }));
   };
 
   const handlePrevious = () => {
@@ -60,7 +86,7 @@ export default function Quiz() {
   };
 
   const handleNext = () => {
-    if (quiz?.questions && currentQuestion < quiz.questions.length - 1 && !isTransitioning) {
+     if (quizData?.questions && currentQuestion < quizData.questions.length - 1 && !isTransitioning) {
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentQuestion(currentQuestion + 1);
@@ -69,52 +95,63 @@ export default function Quiz() {
     }
   };
 
-  const handleSubmit = () => {
-    let correctAnswersCount = 0;
-    const totalQuestions = quiz.questions.length;
+  // ✨ ฟังก์ชัน handleSubmit ให้เรียก API /submit-quiz
+  const handleSubmit = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId || !quizId || !quizData) return;
 
-    quiz.questions.forEach((question, index) => {
-      const userAnswer = selectedAnswers[index];
-      if (userAnswer && userAnswer === question.correctAnswer) {
-        correctAnswersCount++;
-      }
-    });
+    const answeredCountSubmit = Object.keys(selectedAnswers).length;
+    if (answeredCountSubmit !== quizData.questions.length) {
+       alert("Please answer all questions before submitting.");
+       return;
+    }
 
-    const score = Math.floor((correctAnswersCount / totalQuestions) * 100);
-    const answeredCount = Object.keys(selectedAnswers).length;
-    
-    const newHistoryEntry = {
-      id: Date.now(),
-      documentId: id,
-      documentName: quiz.documentName,
-      score: score,
-      totalQuestions: totalQuestions,
-      date: new Date().toISOString(),
-    };
+    setLoading(true);
 
     try {
-      const existingHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-      existingHistory.unshift(newHistoryEntry);
-      localStorage.setItem('quizHistory', JSON.stringify(existingHistory));
+      const response = await fetch(`http://localhost:8000/submit-quiz?user_id=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quiz_id: quizId,
+          answers: selectedAnswers,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to submit quiz." }));
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+
+      const submissionResult = await response.json();
+      console.log("Submission Result:", submissionResult);
+
+      if(submissionResult.success) {
+        navigate(`/quiz/${quizId}/result`, {
+          state: {
+            score: submissionResult.percentage,
+            totalQuestions: submissionResult.total,
+            answeredCount: answeredCountSubmit,
+            documentName: quizData.documentName,
+            results: submissionResult.results
+          }
+        });
+      } else {
+         throw new Error(submissionResult.detail || "Submission failed according to backend.");
+      }
+
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error("Error submitting quiz:", error);
+      alert(`Error submitting quiz: ${error.message}`);
+      setLoading(false);
     }
-    
-    navigate(`/quiz/${id}/result`, { 
-      state: { 
-        score, 
-        totalQuestions, 
-        answeredCount,
-        documentName: quiz.documentName 
-      } 
-    });
   };
 
-  if (loading) return <div className="home-root"><div>Loading...</div></div>;
-  if (!quiz || !quiz.questions || quiz.questions.length === 0) return <div className="home-root"><div>No quiz found for this document.</div></div>;
+  if (loading) return <div className="home-root"><div>Loading Quiz...</div></div>;
+  if (!quizData || !quizData.questions || quizData.questions.length === 0) return <div className="home-root"><div>Could not load quiz data. Please try generating it again or check the URL.</div></div>;
 
-  const totalQuestions = quiz.questions.length;
-  const currentQ = quiz.questions[currentQuestion];
+  const totalQuestions = quizData.questions.length;
+  const currentQ = quizData.questions[currentQuestion];
   const isLastQuestion = currentQuestion === totalQuestions - 1;
   const allAnswered = Object.keys(selectedAnswers).length === totalQuestions;
 
@@ -123,19 +160,19 @@ export default function Quiz() {
       <main className="quiz-main">
         <div className="quiz-section page-transition">
           <div className={`quiz-question-card ${isTransitioning ? 'transitioning' : ''}`}>
-            
+
             <div className="quiz-card-header">
-              <button className="quiz-back-btn" onClick={() => navigate(`/document/${id}`)}>
-                ‹ Back
+              <button className="quiz-back-btn" onClick={() => navigate('/home')}>
+                ‹ Back to Home
               </button>
             </div>
-            
+
             <div className="quiz-question-box">
               <div className="quiz-question">{currentQ.question}</div>
-              
+
               <div className="quiz-navigation">
-                <button 
-                  className="quiz-nav-btn quiz-nav-prev" 
+                <button
+                  className="quiz-nav-btn quiz-nav-prev"
                   onClick={handlePrevious}
                   disabled={currentQuestion === 0 || isTransitioning}
                 >
@@ -146,9 +183,9 @@ export default function Quiz() {
                   <span className="divider">/</span>
                   <span className="total-number">{totalQuestions}</span>
                 </span>
-                
+
                 {isLastQuestion && allAnswered ? (
-                  <button 
+                  <button
                     className="quiz-submit-btn"
                     onClick={handleSubmit}
                     disabled={isTransitioning}
@@ -156,8 +193,8 @@ export default function Quiz() {
                     Submit
                   </button>
                 ) : (
-                  <button 
-                    className="quiz-nav-btn quiz-nav-next" 
+                  <button
+                    className="quiz-nav-btn quiz-nav-next"
                     onClick={handleNext}
                     disabled={(isLastQuestion && !allAnswered) || isTransitioning}
                   >
@@ -168,20 +205,20 @@ export default function Quiz() {
             </div>
 
             <div className="quiz-options">
-              {['A', 'B', 'C', 'D'].map((option) => (
-                <label 
-                  key={option}
-                  className={`quiz-option-label ${selectedAnswers[currentQuestion] === option ? 'selected' : ''}`}
+              {['A', 'B', 'C', 'D'].map((optionKey) => (
+                <label
+                  key={optionKey}
+                  className={`quiz-option-label ${selectedAnswers[currentQ.id] === optionKey ? 'selected' : ''}`}
                 >
-                  <input 
-                    type="radio" 
-                    name={`q${currentQuestion}`} 
-                    value={option}
-                    checked={selectedAnswers[currentQuestion] === option}
-                    onChange={() => handleAnswerChange(option)}
+                  <input
+                    type="radio"
+                    name={`q_${currentQ.id}`}
+                    value={optionKey}
+                    checked={selectedAnswers[currentQ.id] === optionKey}
+                    onChange={() => handleAnswerChange(optionKey, currentQ.id)}
                   />
-                  <span className="option-number">{option}</span>
-                  <span className="option-text">{currentQ[`option${option}`]}</span>
+                  <span className="option-number">{optionKey}</span>
+                  <span className="option-text">{currentQ[`option${optionKey}`]}</span>
                 </label>
               ))}
             </div>

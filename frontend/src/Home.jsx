@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import "./Home.css"; // ✨ 1. นำ import .css กลับมา
+import "./Home.css";
 import { useNavigate } from "react-router-dom";
+// 1. Import your new logo image
+import newLogo from './logo-icon.png';
 
 export default function Home() {
   const [documents, setDocuments] = useState([]);
@@ -29,13 +31,18 @@ export default function Home() {
 
   return (
     <>
-      {/* ✨ 2. ลบ <style> tag ออก */}
       <div className="home-root page-transition">
         <header className="home-header">
-          <img src="/logo.png" alt="logo" className="home-logo" />
+          {/* 2. Use the imported logo in the src attribute */}
+          <img src={newLogo} alt="logo" className="home-logo" />
         </header>
         
         <main className="home-main">
+          <div className="home-title-section">
+            <h1 className="home-title">My Documents</h1>
+            <hr className="home-content-divider" />
+          </div>
+
           {loading ? (
             <div>Loading...</div>
           ) : (
@@ -50,6 +57,7 @@ export default function Home() {
                     onClick={() => navigate(`/document/${doc.id}`)}
                   >
                     <div className="home-doc-icon">
+                      {/* You can also use the new logo here if you want */}
                       <img src="/logo.png" alt="file" className="home-doc-img" />
                     </div>
                     <div className="home-doc-name">{doc.filename}</div>
@@ -70,4 +78,3 @@ export default function Home() {
     </>
   );
 }
-

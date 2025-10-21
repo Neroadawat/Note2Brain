@@ -8,12 +8,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* ✨ พื้นหลัง Modern Tech หลักสำหรับทุกหน้า */
-  background-color: #0a192f;
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
+  /* ✨ [แก้ไข] เปลี่ยนเป็นพื้นหลังรูปภาพ (วิธีที่ถูกต้อง) */
+  
+  /* 1. สีพื้นหลังสำรอง */
+  background-color: #0a192f; 
+  
+  /* 2. ระบุ URL ของรูปภาพที่อยู่ในโฟลเดอร์ src เดียวกัน */
+  background-image: url('Background\ \(2\).JPG');
+  
+  /* 3. ทำให้รูปภาพเต็มหน้าจอและไม่ยืด */
+  background-size: cover;
+  
+  /* 4. จัดให้รูปอยู่กลางจอ */
+  background-position: center;
+  
+  /* 5. ทำให้พื้นหลังอยู่นิ่งๆ เวลา scroll */
+  background-attachment: fixed; 
 }
 
 code {

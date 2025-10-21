@@ -1,53 +1,98 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FileText, Layers, Lightbulb } from 'lucide-react';
-import "./Document.css";
-import QuizGenerate from "./QuizGenerate.jsx";
+import "./Document.css"; // ตรวจสอบว่า import CSS ถูกต้อง
+import QuizGenerate from "./QuizGenerate.jsx"; // ตรวจสอบว่า path นี้ถูกต้อง
 
 export default function Document() {
-  const { id } = useParams();
+  const { id: documentId } = useParams();
   const [doc, setDoc] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  // ✨ 1. เปลี่ยนชื่อ state เพื่อความชัดเจน
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
 
   useEffect(() => {
     const fetchDoc = async () => {
+      // ไม่ต้องส่ง user_id เพราะ Backend Endpoint นี้ไม่ได้รับ
       try {
-        const res = await fetch(`http://localhost:8000/document/${id}`);
-        const data = await res.json();
-        setDoc(data);
+        // ลบ ?user_id=${userId} ออกจาก URL
+        const res = await fetch(`http://localhost:8000/document/${documentId}`);
+
+        if (!res.ok) {
+           // ถ้า Backend ตอบ Error (เช่น 404 Not Found)
+           const errorData = await res.json().catch(() => ({ detail: "Document not found." }));
+           // ไม่ต้องเช็ค access denied เพราะ Backend ไม่ได้เช็ค owner
+           throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
+        }
+
+        // ✨ รับข้อมูล document object ตรงๆ และเช็คว่ามี id หรือไม่
+        const documentData = await res.json();
+        if (documentData && documentData.id) {
+            setDoc(documentData);
+        } else {
+             // โยน Error ถ้าข้อมูลที่ได้กลับมาไม่ใช่ document object ที่ถูกต้อง
+             throw new Error("Received invalid document data structure from backend.");
+        }
+
       } catch (err) {
+        console.error("Error fetching document:", err);
         setDoc(null);
       } finally {
         setLoading(false);
       }
     };
     fetchDoc();
-  }, [id]);
+  // ลบ navigate ออกจาก Dependency Array
+  }, [documentId]);
 
-  // ✨ 2. เพิ่มฟังก์ชันสำหรับจัดการการสร้าง Quiz
-  const handleCreateQuiz = ({ difficulty, numQuestions }) => {
-    // ปิด Modal
+  // ฟังก์ชัน handleCreateQuiz (เหมือนเดิม - ยังเรียก API ที่ถูกต้อง)
+  const handleCreateQuiz = async ({ difficulty, numQuestions }) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId || !documentId) { alert("Error: Missing user or document information."); return; }
+    setIsGeneratingQuiz(true);
     setIsModalOpen(false);
-    // นำทางไปยังหน้า Quiz พร้อมส่งค่าที่เลือกไปด้วย
-    navigate(`/document/${id}/quiz?difficulty=${difficulty}&questions=${numQuestions}`);
+    try {
+      const response = await fetch(`http://localhost:8000/generate-quiz?user_id=${userId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', },
+        body: JSON.stringify({
+          document_id: documentId,
+          difficulty: difficulty.toLowerCase(),
+          question_count: parseInt(numQuestions, 10),
+        }),
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: "Failed to generate quiz." }));
+        throw new Error(errorData.detail || `HTTP error! status: ${response.status}`);
+      }
+      const result = await response.json();
+      if (result.success && result.quiz_id) {
+        // ✨ [เพิ่ม] Console Log เพื่อเช็ค userId ก่อน Navigate
+        console.log("UserID BEFORE navigate:", localStorage.getItem("userId"));
+        navigate(`/quiz/${result.quiz_id}`);
+      } else {
+        throw new Error(result.detail || 'Quiz ID not received from backend');
+       }
+    } catch (error) {
+        console.error("Error generating quiz:", error);
+        alert(`Error generating quiz: ${error.message}\nPlease try again.`);
+     }
+    finally { setIsGeneratingQuiz(false); }
   };
 
-  if (loading) return <div className="home-root"><div>Loading...</div></div>;
-  if (!doc) return <div className="home-root"><div>File not found.</div></div>;
+  if (loading) return <div className="home-root"><div>Loading Document...</div></div>;
+  if (isGeneratingQuiz) return <div className="home-root"><div>Generating Quiz... Please wait, this might take a moment. 🧠✨</div></div>;
+  // ✨ ปรับข้อความ Error ให้สอดคล้อง
+  if (!doc) return <div className="home-root"><div>Document not found. Please go back and try another document.</div></div>;
+
 
   return (
-    <div className="home-root">
+    <div className="home-root page-transition">
       <header className="home-header" style={{ position: "relative" }}>
+        {/* คุณอาจจะอยากใช้ logo icon ที่ src/logo-icon.png แทน */}
         <img src="/logo.png" alt="logo" className="home-logo" />
-        <button
-          className="back-btn"
-          onClick={() => navigate("/home")}
-        >
-          Home
-        </button>
+        <button className="back-btn" onClick={() => navigate("/home")}>Home</button>
       </header>
       <hr className="home-divider" />
       <main className="home-main">
@@ -55,35 +100,27 @@ export default function Document() {
         <div className="summary-section">
           <h2 className="summary-title">Summary:</h2>
           <div className="summary-content">
-            <p className="summary-text">
-              {doc.summary || "No summary."}
-            </p>
+            <p className="summary-text">{doc.summary || "No summary available."}</p>
           </div>
         </div>
         <div className="button-container">
-          <button className="simple-button" onClick={() => navigate(`/document/${id}/context`)}>
-            <FileText size={16} />
-            Full Context
+          <button className="simple-button" onClick={() => navigate(`/document/${documentId}/context`)}>
+            <FileText size={16} /> Full Context
           </button>
-          <button className="simple-button" onClick={() => navigate(`/document/${id}/flashcard`)}>
-            <Layers size={16} />
-            Flash Card
+          <button className="simple-button" onClick={() => navigate(`/document/${documentId}/flashcard`)}>
+            <Layers size={16} /> Flash Card
           </button>
           <button className="simple-button" onClick={() => setIsModalOpen(true)}>
-            <Lightbulb size={16} />
-            Quiz
+            <Lightbulb size={16} /> Quiz
           </button>
-          
-          {/* ✨ 3. แก้ไขการเรียกใช้ Component และ Props ให้ถูกต้อง */}
-          <QuizGenerate
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onCreateQuiz={handleCreateQuiz}
-            documentName={doc.filename}
-          />
-
         </div>
       </main>
+      <QuizGenerate
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onCreateQuiz={handleCreateQuiz}
+        documentName={doc.filename}
+      />
     </div>
   );
 }

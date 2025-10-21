@@ -16,7 +16,7 @@ import FullContext from './FullContext';
 
 import './animations.css';
 
-// Layout สำหรับหน้าที่มี Navbar
+// Layout for pages with Navbar
 const MainLayout = () => {
   const location = useLocation();
 
@@ -24,7 +24,6 @@ const MainLayout = () => {
     <>
       <Navbar />
       <main>
-        {/* ✨ [แก้ไข] เพิ่ม div ครอบ Outlet เพื่อทำ Animation */}
         <div className="page-container" key={location.pathname}>
           <Outlet />
         </div>
@@ -33,29 +32,32 @@ const MainLayout = () => {
   );
 };
 
-// ... (ส่วนที่เหลือของ App.jsx เหมือนเดิม)
 function App() {
   return (
     <Router>
       <div className="App">
         <Routes>
-          {/* Routes ที่ไม่มี Navbar */}
+          {/* Routes without Navbar */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
 
-          {/* Routes ที่มี Navbar อยู่ภายใต้ MainLayout */}
+          {/* Routes with Navbar under MainLayout */}
           <Route element={<MainLayout />}>
             <Route path="/upload" element={<UploadOCR />} />
             <Route path="/home" element={<Home />} />
             <Route path="/document/:id" element={<Document />} />
-            <Route path="/document/:id/quiz" element={<Quiz />} />
+            {/* ✨ **EDITED**: Changed route for Quiz */}
+            <Route path="/quiz/:quizId" element={<Quiz />} />
             <Route path="/document/:id/flashcard" element={<Flashcard />} />
             <Route path="/document/:id/context" element={<FullContext />} />
-            <Route path="/quiz/:id/result" element={<QuizResult />} />
+            {/* ✨ **EDITED**: Changed route for QuizResult */}
+            <Route path="/quiz/:quizId/result" element={<QuizResult />} />
             <Route path="/quiz-history" element={<QuizHistory />} />
-            <Route path="/flashcard" element={<Flashcard />} />
+            {/* If flashcard page uses document ID, keep /document/:id/flashcard or adjust */}
+            {/* Assuming a general flashcard page might exist at /flashcard */}
+            <Route path="/flashcard" element={<Flashcard />} /> 
           </Route>
         </Routes>
       </div>

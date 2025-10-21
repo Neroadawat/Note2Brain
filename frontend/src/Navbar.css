@@ -1,16 +1,28 @@
-/* --- Main Navbar Frame --- */
+/* --- Root Variables --- */
+:root {
+  --nav-text-color: #e2e8f0;
+  --nav-text-hover-color: #ffffff;
+  --nav-glass-bg: rgba(255, 255, 255, 0.05);
+  --nav-glass-border: rgba(255, 255, 255, 0.1);
+  --nav-item-active-bg: rgba(255, 255, 255, 0.1);
+}
+
+/* --- กรอบ Navbar หลัก --- */
 .navbar-header {
-  background: #0a192f;
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  background: transparent;
+  border-bottom: none;
   position: sticky;
   top: 0;
   z-index: 1000;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  background-color: rgba(10, 25, 47, 0.85);
-  transition: background-color 0.3s ease;
+  padding: 16px 0;
+  transition: transform 0.4s ease-in-out;
 }
 
+.navbar-header.navbar-hidden {
+  transform: translateY(-100%);
+}
+
+/* ✨ [แก้ไข] ลบ max-width และ margin ออกเพื่อให้เต็มจอ */
 .navbar-container {
   display: flex;
   justify-content: space-between;
@@ -21,117 +33,118 @@
   height: 64px;
 }
 
-/* --- Logo / App Name --- */
+/* --- ส่วนโลโก้/ชื่อแอป --- */
 .navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 22px;
+  /* ✨ [แก้ไข] ปรับขนาดฟอนต์เป็น 30px */
+  font-size: 30px; 
   font-weight: 700;
+  color: var(--nav-text-color);
   text-decoration: none;
-  transition: transform 0.3s ease;
+  transition: color 0.3s ease, transform 0.3s ease;
+  flex: 1; 
+  display: flex;
+  justify-content: flex-start;
 }
-
 .navbar-brand:hover {
+  color: var(--nav-text-hover-color);
   transform: scale(1.02);
 }
-
-/* Keyframes for color animation */
-@keyframes tech-glow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-/* Styles for the logo text in both states */
-.logo-animated, .logo-static {
-  transition: all 0.5s ease-in-out; /* Smooth transition between states */
-}
-
-/* 1. Logo style with shimmer */
-.logo-animated {
-  background: linear-gradient(270deg, #00c6ff, #3b82f6, #9333ea, #3b82f6, #00c6ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  background-size: 400% 400%;
-  animation: tech-glow 6s ease-in-out infinite;
-}
-
-/* ✨ [CORRECTED] 2. Logo style when static (white) */
-.navbar-brand span.logo-static {
-  color: #ffffff; /* Use a more specific selector */
+.navbar-brand span {
+  color: inherit;
   background: none;
-  -webkit-background-clip: unset; /* Reset the clipping properties */
-  background-clip: unset;
   animation: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
 }
 
-
-/* --- Menu and Links --- */
-.navbar-right-menu {
+/* --- สไตล์สำหรับเมนูกลาง (Glassmorphism) --- */
+.navbar-center-menu {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  background: var(--nav-glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--nav-glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  border-radius: 50px;
 }
 
+/* --- เมนูและลิงก์ --- */
 .navbar-item {
   font-family: 'Inter', sans-serif;
-  color: #8892b0;
+  color: var(--nav-text-color);
   text-decoration: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, border 0.3s ease;
+  border-radius: 40px;
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-size: 16px;
   font-weight: 500;
-  background: none;
-  border: 1px solid transparent; /* Add a transparent border to prevent layout shift */
-  cursor: pointer;
-  position: relative; 
-  overflow: hidden;   
+  border: none;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 44px;
+}
+
+.nav-text, .nav-icon {
+  position: absolute;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+.nav-text {
+  opacity: 1;
+  transform: scale(1);
+}
+.nav-icon {
+  opacity: 0;
+  transform: scale(0.7);
 }
 
 .navbar-item:hover {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #ccd6f6;
-  transform: translateY(-2px);
+  color: var(--nav-text-hover-color);
+  background-color: var(--nav-item-active-bg);
 }
 
 .navbar-item.active {
-  transform: translateY(-2px);
-  background-color: rgba(59, 130, 246, 0.1); /* Subtle background glow */
-  border: 1px solid #3b82f6; /* Added the border */
-  
-  /* Shimmer effect for text */
-  background-image: linear-gradient(270deg, #00c6ff, #3b82f6, #9333ea, #3b82f6, #00c6ff);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  
-  background-size: 400% 400%;
-  animation: tech-glow 6s ease-in-out infinite;
+  color: var(--nav-text-hover-color);
+  background-color: var(--nav-item-active-bg);
+  font-weight: 600;
+}
+.navbar-item.active .nav-text {
+  opacity: 0;
+  transform: scale(0.7);
+}
+.navbar-item.active .nav-icon {
+  opacity: 1;
+  transform: scale(1);
 }
 
 
-/* --- Logout Button --- */
+/* --- ส่วนขวา: ปุ่ม Logout --- */
+.navbar-right-actions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .navbar-logout-btn {
   font-family: 'Inter', sans-serif;
-  padding: 8px 16px;
-  border-radius: 8px;
+  padding: 10px 24px;
+  border-radius: 40px;
   font-size: 16px;
   font-weight: 500;
   background: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #ff7b72;
-  border: 1px solid #ff7b72;
-  margin-left: 12px;
+  color: var(--nav-text-color);
+  border: 1px solid var(--nav-glass-border);
 }
 
 .navbar-logout-btn:hover {
-  background-color: rgba(255, 123, 114, 0.1);
-  color: #ff9a94;
-  border-color: #ff9a94;
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 4px 15px rgba(255, 123, 114, 0.1);
+  color: var(--nav-text-hover-color);
+  background-color: var(--nav-item-active-bg);
+  border-color: var(--nav-text-color);
 }
