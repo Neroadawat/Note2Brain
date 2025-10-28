@@ -20,7 +20,7 @@ app.include_router(flashcard_router)
 # ✅ ตั้งค่า CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -33,6 +33,7 @@ TYPHOON_API_KEY = "sk-CZSRGqZVrGBdNuGgNGUXVs1R4HWjBlBSi65nIW4oTmy4Z8EC"
 def typhoon_ocr(file: UploadFile):
     url = "https://api.opentyphoon.ai/v1/ocr"
 
+    file.file.seek(0)
     file_bytes = file.file.read()
     pdf_stream = io.BytesIO(file_bytes)
 
