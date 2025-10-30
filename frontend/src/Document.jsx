@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FileText, Layers, Lightbulb } from 'lucide-react';
 import "./Document.css"; // ตรวจสอบว่า import CSS ถูกต้อง
 import QuizGenerate from "./QuizGenerate.jsx"; // ตรวจสอบว่า path นี้ถูกต้อง
+import FlashcardGenerate from "./FlashcardGenerate.jsx";
 
 export default function Document() {
   const { id: documentId } = useParams();
@@ -11,6 +12,8 @@ export default function Document() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+  const [isFlashcardModalOpen, setIsFlashcardModalOpen] = useState(false);
+  const [isGeneratingFlashcard, setIsGeneratingFlashcard] = useState(false);
 
   useEffect(() => {
     const fetchDoc = async () => {
@@ -81,8 +84,25 @@ export default function Document() {
     finally { setIsGeneratingQuiz(false); }
   };
 
+  // ฟังก์ชัน handleCreateFlashcard
+  const handleCreateFlashcard = async ({ numQuestions }) => {
+    setIsGeneratingFlashcard(true);
+    setIsFlashcardModalOpen(false);
+    
+    try {
+      // Navigate ไปหน้า flashcard พร้อม parameters
+      navigate(`/document/${documentId}/flashcard?questions=${numQuestions}`);
+    } catch (error) {
+      console.error("Error setting up flashcard:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setIsGeneratingFlashcard(false);
+    }
+  };
+
   if (loading) return <div className="home-root"><div>Loading Document...</div></div>;
   if (isGeneratingQuiz) return <div className="home-root"><div>Generating Quiz... Please wait, this might take a moment. 🧠✨</div></div>;
+  if (isGeneratingFlashcard) return <div className="home-root"><div>Generating Flashcard... Please wait, this might take a moment. 🧠✨</div></div>;
   // ✨ ปรับข้อความ Error ให้สอดคล้อง
   if (!doc) return <div className="home-root"><div>Document not found. Please go back and try another document.</div></div>;
 
@@ -107,7 +127,7 @@ export default function Document() {
           <button className="simple-button" onClick={() => navigate(`/document/${documentId}/context`)}>
             <FileText size={16} /> Full Context
           </button>
-          <button className="simple-button" onClick={() => navigate(`/document/${documentId}/flashcard`)}>
+          <button className="simple-button" onClick={() => setIsFlashcardModalOpen(true)}>
             <Layers size={16} /> Flash Card
           </button>
           <button className="simple-button" onClick={() => setIsModalOpen(true)}>
@@ -119,6 +139,12 @@ export default function Document() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreateQuiz={handleCreateQuiz}
+        documentName={doc.filename}
+      />
+      <FlashcardGenerate
+        isOpen={isFlashcardModalOpen}
+        onClose={() => setIsFlashcardModalOpen(false)}
+        onCreateFlashcard={handleCreateFlashcard}
         documentName={doc.filename}
       />
     </div>

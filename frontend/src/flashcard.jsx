@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import './flashcard.css';
 
 export default function Flashcard() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // รับ parameters จาก URL
+  const questionsParam = searchParams.get('questions') || '10';
+  const [numQuestions] = useState(parseInt(questionsParam));
+
   const [flashcards, setFlashcards] = useState([]);
   const [currentCard, setCurrentCard] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -22,21 +28,16 @@ export default function Flashcard() {
     setLoading(true);
     setError('');
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-
       const response = await fetch('http://localhost:8000/flashcards/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          document_id: id
-        }),
-        signal: controller.signal
+          document_id: id,
+          num_questions: numQuestions
+        })
       });
-
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -48,15 +49,11 @@ export default function Flashcard() {
       setIsFlipped(false);
     } catch (error) {
       console.error('Error generating flashcards:', error);
-      if (error.name === 'AbortError') {
-        setError('Request timeout - Backend server might be slow or not responding');
-      } else {
-        setError('Unable to generate flashcards - Please check if backend server is running');
-      }
+      setError('Unable to generate flashcards - Please check if backend server is running');
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, numQuestions]);
 
   useEffect(() => {
     if (id) {
@@ -127,6 +124,42 @@ export default function Flashcard() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [flashcards.length, flipCard, nextCard, prevCard, isTransitioning]);
 
+  const handleRegenerate = async () => {
+    if (!id) {
+      setError('Document ID not found');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    try {
+      const response = await fetch('http://localhost:8000/flashcards/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          document_id: id,
+          num_questions: numQuestions
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      setFlashcards(data.flashcards);
+      setCurrentCard(0);
+      setIsFlipped(false);
+    } catch (error) {
+      console.error('Error regenerating flashcards:', error);
+      setError('Unable to regenerate flashcards');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flashcard-container page-transition">
@@ -187,7 +220,12 @@ export default function Flashcard() {
         <button onClick={() => navigate(`/document/${id}`)} className="btn-back">
           Back
         </button>
-        <h1>Flashcard</h1>
+        <div>
+          <h1>Flashcard</h1>
+          <p className="flashcard-settings">
+            {numQuestions} Questions
+          </p>
+        </div>
         <div className="spacer"></div>
       </div>
 
@@ -252,8 +290,8 @@ export default function Flashcard() {
       </div>
 
       <div className="action-controls">
-        <button onClick={generateFlashcards} className="btn-regenerate" disabled={isTransitioning}>
-          Regenerate
+        <button onClick={handleRegenerate} className="btn-regenerate" disabled={loading}>
+          {loading ? 'Generating...' : 'Regenerate'}
         </button>
       </div>
     </div>
