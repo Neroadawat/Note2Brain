@@ -140,7 +140,8 @@ export default function Flashcard() {
         },
         body: JSON.stringify({
           document_id: id,
-          num_questions: numQuestions
+          num_questions: numQuestions,
+          force_new: true  // เพิ่ม flag นี้
         })
       });
 
@@ -152,6 +153,10 @@ export default function Flashcard() {
       setFlashcards(data.flashcards);
       setCurrentCard(0);
       setIsFlipped(false);
+      
+      // แสดงการแจ้งเตือนว่า regenerate สำเร็จ
+      console.log('Regenerated at:', new Date(data.generated_at * 1000));
+      
     } catch (error) {
       console.error('Error regenerating flashcards:', error);
       setError('Unable to regenerate flashcards');
