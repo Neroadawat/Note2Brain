@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // ✨ [แก้ไข] ลบ useLocation ที่ไม่ใช้ออก
+import { useParams, useNavigate, useLocation } from "react-router-dom"; // ✨ [แก้ไข] ลบ useLocation ที่ไม่ใช้ออก
 import "./Document.css"; // ตรวจสอบว่าจำเป็นต้องใช้ CSS นี้หรือไม่
 import "./Quiz.css";
 
@@ -7,6 +7,7 @@ export default function Quiz() {
   // ✨ [แก้ไข] รับ quizId จาก URL Parameter แทน id เดิม
   const { quizId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [quizData, setQuizData] = useState(null); // เปลี่ยนชื่อ state เพื่อความชัดเจน
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -25,7 +26,8 @@ export default function Quiz() {
     }
 
     const fetchQuizData = async () => {
-      // Mock data ยังคงไว้เป็น fallback เผื่อ API ล่มจริงๆ
+      const userId = localStorage.getItem("userId");
+      const isRetry = location.state?.isRetry || false; // ตรวจสอบว่าเป็นการ Retry หรือไม่
       const mockData = {
         documentName: "Fallback Document",
         questions: [
@@ -33,17 +35,18 @@ export default function Quiz() {
           { id: "mock2", question: "Mock Question 2?", optionA: "A2", optionB: "B2", optionC: "C2", optionD: "D2", correctAnswer: "B" }
         ]
        };
+      const endpoint = isRetry
+        ? `http://localhost:8000/quiz/${quizId}/retry?user_id=${userId}`
+        : `http://localhost:8000/quiz/${quizId}?user_id=${userId}`;
 
       try {
-        // ✨ Fetch ข้อมูล Quiz โดยใช้ Endpoint และ quizId ที่ถูกต้อง
-        const res = await fetch(`http://localhost:8000/quiz/${quizId}?user_id=${userId}`);
+        const res = await fetch(endpoint);
         if (!res.ok) {
-           const errorData = await res.json().catch(() => ({ detail: "Quiz not found or access denied." }));
-           throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
+          const errorData = await res.json().catch(() => ({ detail: "Quiz not found or access denied." }));
+          throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
         }
         const result = await res.json();
 
-        // ✨ ตรวจสอบโครงสร้างข้อมูลที่ Backend ส่งกลับมา
         if (result.success && result.data && result.data.questions && result.data.questions.length > 0) {
           setQuizData({
             documentName: result.data.document?.filename || "Quiz",
@@ -68,7 +71,7 @@ export default function Quiz() {
       console.error("No Quiz ID provided in URL");
       setQuizData(null);
     }
-  }, [quizId, navigate]);
+  }, [quizId, navigate, location.state]);
 
   // ✨ เก็บคำตอบโดยใช้ question.id เป็น key
   const handleAnswerChange = (answerKey, questionId) => {
@@ -102,8 +105,8 @@ export default function Quiz() {
 
     const answeredCountSubmit = Object.keys(selectedAnswers).length;
     if (answeredCountSubmit !== quizData.questions.length) {
-       alert("Please answer all questions before submitting.");
-       return;
+      alert("Please answer all questions before submitting.");
+      return;
     }
 
     setLoading(true);
@@ -126,20 +129,19 @@ export default function Quiz() {
       const submissionResult = await response.json();
       console.log("Submission Result:", submissionResult);
 
-      if(submissionResult.success) {
+      if (submissionResult.success) {
         navigate(`/quiz/${quizId}/result`, {
           state: {
-            score: submissionResult.percentage,
+            score: submissionResult.score,
             totalQuestions: submissionResult.total,
             answeredCount: answeredCountSubmit,
             documentName: quizData.documentName,
-            results: submissionResult.results
-          }
+            results: submissionResult.results,
+          },
         });
       } else {
-         throw new Error(submissionResult.detail || "Submission failed according to backend.");
+        throw new Error(submissionResult.detail || "Submission failed according to backend.");
       }
-
     } catch (error) {
       console.error("Error submitting quiz:", error);
       alert(`Error submitting quiz: ${error.message}`);

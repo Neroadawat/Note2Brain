@@ -388,7 +388,6 @@ async def submit_quiz(
             "quizId": request.quiz_id,
             "score": correct_count,
             "totalQuestions": len(quiz.questions),
-            "answers": request.answers
         }
     )
     
@@ -415,11 +414,109 @@ async def get_quiz_history(
         where={"userId": user_id},
         include={
             "quiz": {
-                "include": {"document": True}
+                "include": {"document": True, "questions": True}
             }
         },
         order={"completedAt": "desc"},
         take=50
     )
     
-    return {"success": True, "data": attempts}
+    return {
+        "success": True,
+        "data": [
+            {
+                "id": attempt.id,
+                "quizId": attempt.quizId,
+                "score": attempt.score,
+                "totalQuestions": attempt.totalQuestions,
+                "answeredCount": len(attempt.quiz.questions),  # สมมติว่าผู้ใช้ตอบครบทุกข้อ
+                "completedAt": attempt.completedAt,
+                "quiz": {
+                    "id": attempt.quiz.id,
+                    "document": {
+                        "id": attempt.quiz.document.id,
+                        "filename": attempt.quiz.document.filename
+                    },
+                    "questions": [
+                        {
+                            "id": question.id,
+                            "question": question.question,
+                            "correctAnswer": question.correctAnswer
+                        }
+                        for question in attempt.quiz.questions
+                    ]
+                }
+            }
+            for attempt in attempts
+        ]
+    }
+
+
+# ==============================
+# Retry Quiz Endpoint
+# ==============================
+@router.get("/quiz/{quiz_id}/retry")
+async def retry_quiz(
+    quiz_id: str,
+    user_id: int = Query(...),
+    prisma = Depends(get_prisma)
+):
+    """ดึงข้อมูล Quiz เดิมสำหรับ Retry"""
+    quiz = await prisma.quiz.find_first(
+        where={"id": quiz_id, "userId": user_id},
+        include={"questions": True, "document": True}
+    )
+    if not quiz:
+        raise HTTPException(status_code=404, detail="Quiz not found or access denied")
+
+    return {
+        "success": True,
+        "data": {
+            "id": quiz.id,
+            "document": {
+                "id": quiz.document.id,
+                "filename": quiz.document.filename
+            },
+            "questions": [
+                {
+                    "id": question.id,
+                    "question": question.question,
+                    "optionA": question.optionA,
+                    "optionB": question.optionB,
+                    "optionC": question.optionC,
+                    "optionD": question.optionD,
+                    "correctAnswer": question.correctAnswer
+                }
+                for question in quiz.questions
+            ]
+        }
+    }
+
+
+# ==============================
+# Delete Quiz Attempt
+# ==============================
+@router.delete("/quiz-attempt/{attempt_id}")
+async def delete_quiz_attempt(
+    attempt_id: str,
+    user_id: int = Query(...),
+    prisma = Depends(get_prisma)
+):
+    """ลบ Quiz Attempt ทีละรายการ"""
+    attempt = await prisma.quizattempt.find_first(
+        where={"id": attempt_id, "userId": user_id}
+    )
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Quiz attempt not found or access denied")
+
+    await prisma.quizattempt.delete(where={"id": attempt_id})
+    return {"success": True, "message": "Quiz attempt deleted successfully"}
+
+@router.delete("/quiz-attempts")
+async def clear_quiz_attempts(
+    user_id: int = Query(...),
+    prisma = Depends(get_prisma)
+):
+    """ลบ Quiz Attempt ทั้งหมดของผู้ใช้"""
+    await prisma.quizattempt.delete_many(where={"userId": user_id})
+    return {"success": True, "message": "All quiz attempts deleted successfully"}

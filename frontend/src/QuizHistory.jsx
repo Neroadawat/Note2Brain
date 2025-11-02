@@ -17,38 +17,89 @@ export default function QuizHistory() {
   const [quizHistory, setQuizHistory] = useState([]);
 
   useEffect(() => {
-    try {
-      const savedHistory = JSON.parse(localStorage.getItem('quizHistory') || '[]');
-      setQuizHistory(savedHistory);
-    } catch (error) {
-      console.error('Error reading from localStorage:', error);
-      setQuizHistory([]);
+    const userId = localStorage.getItem("userId");    
+    if (!userId) {
+      navigate("/login");
+      return;
     }
-  }, []);
 
-  const handleClearHistory = () => {
-    localStorage.removeItem('quizHistory');
-    setQuizHistory([]);
+    const fetchQuizHistory = async () => {
+      try {
+        const res = await fetch(`http://localhost:8000/quiz-history?user_id=${userId}`);
+        if (!res.ok) throw new Error("Failed to fetch quiz history");
+        const data = await res.json();
+        setQuizHistory(data.data || []);
+      } catch (error) {
+        console.error("Error fetching quiz history:", error);
+        setQuizHistory([]);
+      }
+    };
+
+    fetchQuizHistory();
+  }, [navigate]);
+
+  const handleDeleteItem = async (itemId) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this quiz?");
+    if (!confirmDelete) return;
+
+    try {
+      const userId = localStorage.getItem("userId");
+      const res = await fetch(`http://localhost:8000/quiz-attempt/${itemId}?user_id=${userId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete quiz attempt");
+
+      const updatedHistory = quizHistory.filter(item => item.id !== itemId);
+      setQuizHistory(updatedHistory);
+    } catch (error) {
+      console.error("Error deleting quiz attempt:", error);
+      alert("Failed to delete quiz attempt. Please try again.");
+    }
   };
 
-  const handleDeleteItem = (itemId) => {
-    const updatedHistory = quizHistory.filter(item => item.id !== itemId);
-    setQuizHistory(updatedHistory);
-    localStorage.setItem('quizHistory', JSON.stringify(updatedHistory));
+  const handleClearHistory = async () => {
+    const confirmClear = window.confirm("Are you sure you want to clear all quiz history?");
+    if (!confirmClear) return;
+
+    try {
+      const userId = localStorage.getItem("userId");
+      const res = await fetch(`http://localhost:8000/quiz-attempts?user_id=${userId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to clear quiz history");
+
+      setQuizHistory([]);
+    } catch (error) {
+      console.error("Error clearing quiz history:", error);
+      alert("Failed to clear quiz history. Please try again.");
+    }
   };
 
-  const handleRetryQuiz = (documentId) => {
-    navigate(`/document/${documentId}/quiz`);
+  const handleRetryQuiz = (quizId) => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      alert("You need to log in to retry the quiz.");
+      navigate("/login");
+      return;
+    }
+    navigate(`/quiz/${quizId}`, { state: { isRetry: true } });
   };
 
   const handleViewResult = (quizItem) => {
     const resultData = {
       score: quizItem.score,
       totalQuestions: quizItem.totalQuestions,
-      documentName: quizItem.documentName,
-      answeredCount: quizItem.totalQuestions
+      documentName: quizItem.quiz.document.filename,
+      documentId: quizItem.quiz.document.id,
+      answeredCount: quizItem.answeredCount || quizItem.totalQuestions,
+      results: quizItem.quiz.questions.map((q) => ({
+        question: q.question,
+        correctAnswer: q.correctAnswer
+      }))
     };
-    navigate(`/quiz/${quizItem.documentId}/result`, { state: resultData });
+    navigate(`/quiz/${quizItem.quizId}/result`, { state: resultData });
   };
 
   const getGrade = (score) => {
@@ -89,10 +140,11 @@ export default function QuizHistory() {
 
       <main className="history-list">
         {quizHistory.map((item, index) => {
-          const grade = getGrade(item.score);
-          const correctAnswers = Math.round((item.score / 100) * item.totalQuestions);
-          const incorrectAnswers = item.totalQuestions - correctAnswers;
-          
+          const percentage = Math.round((item.score / item.totalQuestions) * 100);
+          const grade = getGrade(percentage);
+          const correctAnswers = item.score;
+          const incorrectAnswers = item.totalQuestions - item.score;
+
           return (
             <div 
               key={item.id} 
@@ -101,10 +153,10 @@ export default function QuizHistory() {
             >
               <div className="history-card-header">
                 <div className="history-info">
-                  <h3 className="history-doc-name">{item.documentName}</h3>
-                  <p className="history-date">{new Date(item.date).toLocaleString()}</p>
+                  <h3 className="history-doc-name">{item.quiz.document.filename}</h3>
+                  <p className="history-date">{new Date(item.completedAt).toLocaleString()}</p>
                 </div>
-                <div className="history-score-badge">{item.score}%</div>
+                <div className="history-score-badge">{percentage}%</div>
               </div>
               <div className="history-card-body">
                 <div className="history-stat-row">
@@ -127,7 +179,7 @@ export default function QuizHistory() {
                 <div className="history-progress-bar">
                   <div
                     className="history-progress-fill"
-                    style={{ width: `${item.score}%` }}
+                    style={{ width: `${percentage}%` }}
                   ></div>
                 </div>
               </div>
@@ -135,7 +187,7 @@ export default function QuizHistory() {
                 <button className="history-action-btn view-btn" onClick={() => handleViewResult(item)}>
                   <View size={16} /> View
                 </button>
-                <button className="history-action-btn retry-btn" onClick={() => handleRetryQuiz(item.documentId)}>
+                <button className="history-action-btn retry-btn" onClick={() => handleRetryQuiz(item.quizId)}>
                   <RotateCw size={16} /> Retry
                 </button>
                 <button className="history-action-btn delete-btn" onClick={() => handleDeleteItem(item.id)}>

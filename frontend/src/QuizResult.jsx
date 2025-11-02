@@ -1,41 +1,42 @@
 import React from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, LayoutGrid, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import './QuizResult.css';
 
 export default function QuizResult() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { id } = useParams();
 
-  const { score, totalQuestions, answeredCount, documentName } = location.state || {
+  const { score, totalQuestions, answeredCount, documentName, documentId } = location.state || {
     score: 0,
     totalQuestions: 0,
     answeredCount: 0,
-    documentName: "Unknown Document"
+    documentName: "Unknown Document",
+    documentId: null,
   };
 
-  const getScoreMessage = (score) => {
-    if (score >= 80) return "Excellent Performance";
-    if (score >= 60) return "Good Progress";
+  const getScoreMessage = (percentage) => {
+    if (percentage >= 80) return "Excellent Performance";
+    if (percentage >= 60) return "Good Progress";
     return "Keep Learning";
   };
 
-  const getScoreDescription = (score) => {
-    if (score >= 80) return "Outstanding! You have a strong grasp of this material.";
-    if (score >= 60) return "Great work. You're building a solid foundation.";
+  const getScoreDescription = (percentage) => {
+    if (percentage >= 80) return "Outstanding! You have a strong grasp of this material.";
+    if (percentage >= 60) return "Great work. You're building a solid foundation.";
     return "Every attempt is a step forward. Keep practicing!";
   };
 
-  const correctAnswers = Math.round((score / 100) * totalQuestions);
-  const incorrectAnswers = totalQuestions - correctAnswers;
-  
+  const percentage = Math.round((score / totalQuestions) * 100); // คำนวณเปอร์เซ็นต์
+  const correctAnswers = score; // จำนวนคำตอบที่ถูกต้อง
+  const incorrectAnswers = totalQuestions - score; // จำนวนคำตอบที่ผิด
+
   return (
     <div className="result-page-container">
       <div className="result-card-tech">
         <div className="result-badge-tech">Quiz Completed</div>
-        <h1 className="result-title-tech">{getScoreMessage(score)}</h1>
-        <p className="result-description-tech">{getScoreDescription(score)}</p>
+        <h1 className="result-title-tech">{getScoreMessage(percentage)}</h1>
+        <p className="result-description-tech">{getScoreDescription(percentage)}</p>
         
         <div className="result-document-tech">
           <FileText size={16} /> 
@@ -44,7 +45,7 @@ export default function QuizResult() {
         
         <div className="score-display-tech">
           <div className="score-value-tech">
-            {score}%
+            {percentage}%
           </div>
           <div className="score-label-tech">Final Score</div>
         </div>
@@ -70,7 +71,8 @@ export default function QuizResult() {
         <div className="result-actions-tech">
           <button 
             className="result-btn-tech result-btn-secondary-tech"
-            onClick={() => navigate(`/document/${id}`)}
+            onClick={() => navigate(`/document/${documentId}`)}
+            disabled={!documentId} // ปิดการใช้งานปุ่มหากไม่มี documentId
           >
             <BookOpen size={16} />
             Back to Document
