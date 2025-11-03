@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import './flashcard.css';
 
@@ -7,7 +7,6 @@ export default function Flashcard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
-  // รับ parameters จาก URL
   const questionsParam = searchParams.get('questions') || '10';
   const [numQuestions] = useState(parseInt(questionsParam));
 
@@ -18,15 +17,21 @@ export default function Flashcard() {
   const [error, setError] = useState('');
   const [direction, setDirection] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
+  
+  // ใช้ useRef แทน useState สำหรับ hasGenerated
+  const hasGeneratedRef = useRef(false);
+  const isInitializingRef = useRef(false);
 
-  const generateFlashcards = useCallback(async () => {
-    if (!id) {
-      setError('Document ID not found');
+  const generateFlashcards = async () => {
+    if (!id || hasGeneratedRef.current) {
       return;
     }
 
+    // ย้าย hasGeneratedRef.current = true ไปไว้หลัง API สำเร็จ
+    isInitializingRef.current = true;
     setLoading(true);
     setError('');
+    
     try {
       const response = await fetch('http://localhost:8000/flashcards/generate', {
         method: 'POST',
@@ -47,26 +52,39 @@ export default function Flashcard() {
       setFlashcards(data.flashcards);
       setCurrentCard(0);
       setIsFlipped(false);
+      
+      // ตั้ง hasGenerated เป็น true หลังสำเร็จเท่านั้น
+      hasGeneratedRef.current = true;
+      
+      // delay เพื่อให้ state stable
+      setTimeout(() => {
+        isInitializingRef.current = false;
+      }, 200);
+      
     } catch (error) {
       console.error('Error generating flashcards:', error);
       setError('Unable to generate flashcards - Please check if backend server is running');
+      hasGeneratedRef.current = false;
+      isInitializingRef.current = false;
     } finally {
       setLoading(false);
     }
-  }, [id, numQuestions]);
+  };
 
+  // ใช้ useEffect แบบ simple ไม่มี dependencies ซับซ้อน
   useEffect(() => {
     if (id) {
       generateFlashcards();
     }
-  }, [id, generateFlashcards]);
+  }, [id]); // เฉพาะ id เท่านั้น
 
   const flipCard = useCallback(() => {
+    if (isInitializingRef.current || loading) return;
     setIsFlipped(prev => !prev);
-  }, []);
+  }, [loading]);
 
   const nextCard = useCallback(() => {
-    if (currentCard < flashcards.length - 1 && !isTransitioning) {
+    if (currentCard < flashcards.length - 1 && !isTransitioning && !isInitializingRef.current && !loading) {
       setDirection('next');
       setIsTransitioning(true);
       setIsFlipped(false);
@@ -79,10 +97,10 @@ export default function Flashcard() {
         }, 50);
       }, 300);
     }
-  }, [currentCard, flashcards.length, isTransitioning]);
+  }, [currentCard, flashcards.length, isTransitioning, loading]);
 
   const prevCard = useCallback(() => {
-    if (currentCard > 0 && !isTransitioning) {
+    if (currentCard > 0 && !isTransitioning && !isInitializingRef.current && !loading) {
       setDirection('prev');
       setIsTransitioning(true);
       setIsFlipped(false);
@@ -95,11 +113,11 @@ export default function Flashcard() {
         }, 50);
       }, 300);
     }
-  }, [currentCard, isTransitioning]);
+  }, [currentCard, isTransitioning, loading]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (flashcards.length === 0 || isTransitioning) return;
+      if (flashcards.length === 0 || isTransitioning || isInitializingRef.current || loading) return;
       
       switch(e.key) {
         case 'ArrowLeft':
@@ -122,7 +140,7 @@ export default function Flashcard() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [flashcards.length, flipCard, nextCard, prevCard, isTransitioning]);
+  }, [flashcards.length, flipCard, nextCard, prevCard, isTransitioning, loading]);
 
   const handleRegenerate = async () => {
     if (!id) {
@@ -132,6 +150,7 @@ export default function Flashcard() {
 
     setLoading(true);
     setError('');
+    
     try {
       const response = await fetch('http://localhost:8000/flashcards/generate', {
         method: 'POST',
@@ -141,7 +160,7 @@ export default function Flashcard() {
         body: JSON.stringify({
           document_id: id,
           num_questions: numQuestions,
-          force_new: true  // เพิ่ม flag นี้
+          force_new: true
         })
       });
 
@@ -154,9 +173,6 @@ export default function Flashcard() {
       setCurrentCard(0);
       setIsFlipped(false);
       
-      // แสดงการแจ้งเตือนว่า regenerate สำเร็จ
-      console.log('Regenerated at:', new Date(data.generated_at * 1000));
-      
     } catch (error) {
       console.error('Error regenerating flashcards:', error);
       setError('Unable to regenerate flashcards');
@@ -165,7 +181,7 @@ export default function Flashcard() {
     }
   };
 
-  if (loading) {
+  if (loading || isInitializingRef.current) {
     return (
       <div className="flashcard-container page-transition">
         <div className="loading-spinner">
@@ -183,7 +199,10 @@ export default function Flashcard() {
           <h2>Error Occurred</h2>
           <p>{error}</p>
           <div className="error-actions">
-            <button onClick={generateFlashcards} className="btn-generate">
+            <button onClick={() => {
+              hasGeneratedRef.current = false;
+              generateFlashcards();
+            }} className="btn-generate">
               Try Again
             </button>
             {id && (
@@ -203,7 +222,10 @@ export default function Flashcard() {
         <div className="empty-state">
           <h1>Flashcard</h1>
           <p>No flashcards available for this document</p>
-          <button onClick={generateFlashcards} className="btn-generate">
+          <button onClick={() => {
+            hasGeneratedRef.current = false;
+            generateFlashcards();
+          }} className="btn-generate">
             Generate Flashcards
           </button>
           {id && (
@@ -269,20 +291,20 @@ export default function Flashcard() {
       <div className="card-controls">
         <button 
           onClick={prevCard} 
-          disabled={currentCard === 0 || isTransitioning}
+          disabled={currentCard === 0 || isTransitioning || isInitializingRef.current}
           className="btn-nav"
           aria-label="Previous card"
         >
           <span className="btn-text">Previous</span>
         </button>
         
-        <button onClick={flipCard} className="btn-flip" disabled={isTransitioning}>
+        <button onClick={flipCard} className="btn-flip" disabled={isTransitioning || isInitializingRef.current}>
           {isFlipped ? 'Show Question' : 'Show Answer'}
         </button>
         
         <button 
           onClick={nextCard} 
-          disabled={currentCard === flashcards.length - 1 || isTransitioning}
+          disabled={currentCard === flashcards.length - 1 || isTransitioning || isInitializingRef.current}
           className="btn-nav"
           aria-label="Next card"
         >
@@ -295,8 +317,8 @@ export default function Flashcard() {
       </div>
 
       <div className="action-controls">
-        <button onClick={handleRegenerate} className="btn-regenerate" disabled={loading}>
-          {loading ? 'Generating...' : 'Regenerate'}
+        <button onClick={handleRegenerate} className="btn-regenerate" disabled={loading || isInitializingRef.current}>
+          {loading || isInitializingRef.current ? 'Generating...' : 'Regenerate'}
         </button>
       </div>
     </div>
