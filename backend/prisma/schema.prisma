@@ -67,6 +67,7 @@ model QuizAttempt {
   quizId         String
   score          Int
   totalQuestions Int
+  answers        String
   completedAt    DateTime @default(now())
   quiz           Quiz     @relation(fields: [quizId], references: [id])
   user           User     @relation(fields: [userId], references: [id])

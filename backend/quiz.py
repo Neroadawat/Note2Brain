@@ -349,7 +349,6 @@ async def submit_quiz(
 ):
     """ส่งคำตอบและคำนวณคะแนน"""
     
-    # ดึง quiz พร้อมคำถาม
     quiz = await prisma.quiz.find_first(
         where={
             "id": request.quiz_id,
@@ -361,17 +360,17 @@ async def submit_quiz(
     if not quiz:
         raise HTTPException(status_code=404, detail="ไม่พบ quiz")
     
-    # คำนวณคะแนน
     correct_count = 0
     results = []
-    
+
+    # loop ตรวจคำตอบ
     for question in quiz.questions:
         user_answer = request.answers.get(question.id, "")
         is_correct = user_answer.upper() == question.correctAnswer.upper()
         
         if is_correct:
             correct_count += 1
-        
+
         results.append({
             "question_id": question.id,
             "question": question.question,
@@ -380,17 +379,30 @@ async def submit_quiz(
             "is_correct": is_correct,
             "explanation": question.explanation
         })
-    
-    # บันทึกผล
-    attempt = await prisma.quizattempt.create(
-        data={
-            "userId": user_id,
-            "quizId": request.quiz_id,
-            "score": correct_count,
-            "totalQuestions": len(quiz.questions),
-        }
-    )
-    
+
+    # ✅ เก็บเฉพาะ user answers แบบ key-value
+    answers_to_store = {
+        question_id: request.answers.get(question_id, "")
+        for question_id in request.answers.keys()
+    }
+
+    try:
+        # แปลงเฉพาะคำตอบเป็น JSON string
+        answers_json_str = json.dumps(answers_to_store, ensure_ascii=False)
+        
+        attempt = await prisma.quizattempt.create(
+            data={
+                "userId": user_id,
+                "quizId": request.quiz_id,
+                "score": correct_count,
+                "totalQuestions": len(quiz.questions),
+                "answers": answers_json_str  # ✅ เก็บเฉพาะคำตอบของ user
+            }
+        )
+    except Exception as e:
+        print("ERROR: Failed to create QuizAttempt:", e)
+        raise HTTPException(status_code=500, detail=f"Failed to save quiz attempt: {str(e)}")
+
     return {
         "success": True,
         "score": correct_count,
@@ -399,6 +411,7 @@ async def submit_quiz(
         "results": results,
         "attempt_id": attempt.id
     }
+
 
 
 # ==============================
@@ -431,6 +444,7 @@ async def get_quiz_history(
                 "totalQuestions": attempt.totalQuestions,
                 "answeredCount": len(attempt.quiz.questions),  # สมมติว่าผู้ใช้ตอบครบทุกข้อ
                 "completedAt": attempt.completedAt,
+                "answers": json.loads(attempt.answers) if attempt.answers else None,  # Parse JSON string back to object
                 "quiz": {
                     "id": attempt.quiz.id,
                     "document": {
@@ -512,6 +526,38 @@ async def delete_quiz_attempt(
     await prisma.quizattempt.delete(where={"id": attempt_id})
     return {"success": True, "message": "Quiz attempt deleted successfully"}
 
+
+@router.get("/quiz-attempt/{attempt_id}")
+async def get_quiz_attempt(
+    attempt_id: str,
+    user_id: int = Query(...),
+    prisma = Depends(get_prisma)
+):
+    """ดึงรายละเอียด QuizAttempt รวมถึงคำตอบที่บันทึกไว้"""
+    attempt = await prisma.quizattempt.find_first(
+        where={"id": attempt_id, "userId": user_id},
+        include={
+            "quiz": {"include": {"document": True, "questions": True}}
+        }
+    )
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="Quiz attempt not found or access denied")
+
+    # Parse answers JSON string back to object
+    attempt_data = {
+        "id": attempt.id,
+        "userId": attempt.userId,
+        "quizId": attempt.quizId,
+        "score": attempt.score,
+        "totalQuestions": attempt.totalQuestions,
+        "completedAt": attempt.completedAt,
+        "answers": json.loads(attempt.answers) if attempt.answers else None,
+        "quiz": attempt.quiz
+    }
+
+    return {"success": True, "data": attempt_data}
+
 @router.delete("/quiz-attempts")
 async def clear_quiz_attempts(
     user_id: int = Query(...),
@@ -520,3 +566,73 @@ async def clear_quiz_attempts(
     """ลบ Quiz Attempt ทั้งหมดของผู้ใช้"""
     await prisma.quizattempt.delete_many(where={"userId": user_id})
     return {"success": True, "message": "All quiz attempts deleted successfully"}
+
+# ==============================
+# Get Quiz Result with Answers
+# ==============================
+@router.get("/quiz/{quiz_id}/result")
+async def get_quiz_result(
+    quiz_id: str,
+    user_id: int = Query(...),
+    prisma = Depends(get_prisma)
+):
+    """ดึงผลลัพธ์และคำเฉลยของ quiz"""
+    # 1. ดึง quiz และคำถามทั้งหมด
+    quiz = await prisma.quiz.find_first(
+        where={
+            "id": quiz_id,
+            "userId": user_id
+        },
+        include={
+            "questions": True,
+            "document": True
+        }
+    )
+    
+    if not quiz:
+        raise HTTPException(status_code=404, detail="ไม่พบ quiz หรือไม่มีสิทธิ์เข้าถึง")
+
+    # 2. ดึง attempt ล่าสุดของ quiz นี้
+    attempt = await prisma.quizattempt.find_first(
+        where={
+            "quizId": quiz_id,
+            "userId": user_id
+        },
+        order={"completedAt": "desc"}
+    )
+
+    if not attempt:
+        raise HTTPException(status_code=404, detail="ยังไม่มีการทำ quiz นี้")
+
+    # 3. แปลง answers จาก JSON string เป็น dict
+    user_answers = json.loads(attempt.answers) if attempt.answers else {}
+
+    # 4. สร้าง response
+    return {
+        "success": True,
+        "data": {
+            "quiz_id": quiz.id,
+            "document": {
+                "id": quiz.document.id,
+                "filename": quiz.document.filename
+            },
+            "score": attempt.score,
+            "total": attempt.totalQuestions,
+            "answeredCount": len(user_answers),
+            "questions": [
+                {
+                    "id": q.id,
+                    "question": q.question,
+                    "optionA": q.optionA,
+                    "optionB": q.optionB,
+                    "optionC": q.optionC,
+                    "optionD": q.optionD,
+                    "correctAnswer": q.correctAnswer,
+                    "userAnswer": user_answers.get(q.id, ""),
+                    "explanation": q.explanation,
+                    "isCorrect": user_answers.get(q.id, "").upper() == q.correctAnswer.upper()
+                }
+                for q in quiz.questions
+            ]
+        }
+    }

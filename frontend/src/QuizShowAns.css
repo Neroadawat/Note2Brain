@@ -1,0 +1,64 @@
+/* Styles specific to the answer-review page */
+.quiz-showans-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.quiz-option-label.correct {
+  border-color: #16a34a; /* green */
+  background: #ecfdf5;
+}
+.quiz-option-label.incorrect {
+  border-color: #ef4444; /* red */
+  background: #fff1f2;
+}
+
+.option-number.correct {
+  background-color: #16a34a !important;
+  color: white !important;
+  border-color: #16a34a !important;
+}
+.option-number.incorrect {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+}
+
+.option-text.correct {
+  color: #065f46; /* dark green */
+  font-weight: 700;
+}
+.option-text.incorrect {
+  color: #7f1d1d; /* dark red */
+}
+
+.quiz-badges {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+}
+.badge {
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  margin-right: 8px;
+  font-weight: 700;
+}
+.correct-badge {
+  background: #16a34a;
+  color: white;
+}
+.incorrect-badge {
+  background: #ef4444;
+  color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .quiz-showans-options {
+    grid-template-columns: 1fr;
+  }
+}

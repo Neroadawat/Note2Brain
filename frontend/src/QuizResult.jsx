@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BookOpen, LayoutGrid, CheckCircle2, XCircle, FileText } from 'lucide-react';
 import './QuizResult.css';
 
@@ -14,6 +14,8 @@ export default function QuizResult() {
     documentName: "Unknown Document",
     documentId: null,
   };
+
+  const { quizId } = useParams();
 
   const getScoreMessage = (percentage) => {
     if (percentage >= 80) return "Excellent Performance";
@@ -83,6 +85,14 @@ export default function QuizResult() {
           >
             <LayoutGrid size={16} />
             View History
+          </button>
+          <button
+            className="result-btn-tech result-btn-outline-tech"
+            onClick={() => navigate(`/quiz/${quizId}/answer`)}
+            disabled={!quizId}
+          >
+            <CheckCircle2 size={16} />
+            Review Answers
           </button>
         </div>
       </div>

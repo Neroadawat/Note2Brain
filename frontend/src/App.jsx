@@ -10,6 +10,7 @@ import Home from './Home';
 import Document from './Document';
 import Quiz from './Quiz';
 import QuizResult from './QuizResult';
+import QuizShowAns from './QuizShowAns';
 import QuizHistory from './QuizHistory';
 import Flashcard from './flashcard';
 import FullContext from './FullContext';
@@ -52,8 +53,9 @@ function App() {
             <Route path="/quiz/:quizId" element={<Quiz />} />
             <Route path="/document/:id/flashcard" element={<Flashcard />} />
             <Route path="/document/:id/context" element={<FullContext />} />
-            {/* ✨ **EDITED**: Changed route for QuizResult */}
+            {/* Routes for quiz results */}
             <Route path="/quiz/:quizId/result" element={<QuizResult />} />
+            <Route path="/quiz/:quizId/answer" element={<QuizShowAns />} />
             <Route path="/quiz-history" element={<QuizHistory />} />
             {/* If flashcard page uses document ID, keep /document/:id/flashcard or adjust */}
             {/* Assuming a general flashcard page might exist at /flashcard */}
