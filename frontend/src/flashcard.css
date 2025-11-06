@@ -1,12 +1,19 @@
+/*
+ * === FLASHCARD V. NAVY & WHITE (FINAL UPGRADE) ===
+ * (แก้ไข: .card-front เป็นสีขาว, text เป็นสีเข้ม)
+ */
+
+/* === 1. Background Layer (Transparent) === */
 .flashcard-container {
   max-width: 700px;
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
-  background: #ffffff;
+  background: transparent;
+  overflow: hidden;
 }
 
-/* Header */
+/* === 2. Header Section === */
 .flashcard-header {
   display: flex;
   align-items: center;
@@ -15,55 +22,54 @@
   animation: fadeInDown 0.6s ease-out;
 }
 
-/* ✨ [EDIT] Added a gradient and shadow to the title */
 .flashcard-header h1 {
   margin: 0;
   font-size: 38px;
   font-weight: 700;
   letter-spacing: 1px;
-  /* Gradient text effect */
-  background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+  
+  background: linear-gradient(90deg, #e0e0e0 25%, #ffffff 50%, #e0e0e0 75%);
+  background-size: 400% 100%;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-fill-color: transparent;
-  text-shadow: 0 2px 10px rgba(30, 64, 175, 0.1);
+  color: transparent;
+  animation: shimmer-text 5s infinite linear;
 }
 
-/* ✨ [EDIT] Changed the color and style of the back button */
 .btn-back {
   padding: 10px 24px;
-  background: #eff6ff; /* Light blue background */
-  color: #1e40af; /* Dark blue text */
-  border: 1px solid #dbeafe; /* Light blue border */
+  background: rgba(255, 255, 255, 0.1);
+  color: #E0E0E0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   cursor: pointer;
   font-size: 15px;
-  font-weight: 600; /* Made font a bit bolder */
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .btn-back:hover {
-  background: #dbeafe; /* Slightly darker blue on hover */
-  border-color: #bfdbfe;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: #ffffff;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.15); /* Blue shadow */
 }
 
 .btn-back:active {
   transform: translateY(0);
 }
 
-
 .spacer {
   width: 100px;
 }
 
-/* Progress Bar */
+/* === 3. Progress Bar & Counter === */
 .progress-bar {
   width: 100%;
-  height: 6px;
-  background: #f0f0f0;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -72,59 +78,47 @@
 
 .progress-fill {
   height: 100%;
-  background: #1e40af;
+  background: #ffffff;
   transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   border-radius: 10px;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(30, 64, 175, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .progress-fill::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: shimmer 2s infinite;
+  display: none;
 }
 
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Card Counter */
 .card-counter {
   text-align: center;
   margin-bottom: 25px;
   font-size: 16px;
-  color: #666;
+  color: #E0E0E0;
   font-weight: 500;
   animation: fadeIn 0.6s ease-out 0.2s both;
   letter-spacing: 0.5px;
 }
 
-/* Card Wrapper for animation */
+/* === 4. Flashcard Container === */
 .card-wrapper {
   perspective: 1500px;
   margin: 30px 0;
   animation: fadeIn 0.6s ease-out 0.3s both;
 }
 
-/* Card */
 .card {
   width: 100%;
   height: 380px;
   cursor: pointer;
   transform-style: preserve-3d;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  border: none;
+  box-shadow: none;
 }
 
 .card:hover {
-  transform: scale(1.02) translateY(-5px);
+  transform: none;
 }
 
 .card.transitioning {
@@ -140,25 +134,13 @@
 }
 
 @keyframes slideOutLeft {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-50px) scale(0.9);
-  }
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(-50px) scale(0.9); }
 }
 
 @keyframes slideOutRight {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(50px) scale(0.9);
-  }
+  from { opacity: 1; transform: translateX(0) scale(1); }
+  to { opacity: 0; transform: translateX(50px) scale(0.9); }
 }
 
 .card-inner {
@@ -174,49 +156,51 @@
   transform: rotateY(180deg);
 }
 
+/* vvvvvvvvvv THIS SECTION IS MODIFIED vvvvvvvvvv */
+
+/* 1. สไตล์ "โครงสร้าง" ที่ใช้ร่วมกัน */
 .card-front, .card-back {
   position: absolute;
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border: 1px solid #e0e0e0;
-  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
+  border-radius: 20px;
+  transition: all 0.4s ease;
 }
+
+/* 2. สไตล์หน้าคำถาม (สีขาว) */
+.card-front {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* 3. สไตล์หน้าคำตอบ (Glass UI เดิม) */
+.card-back {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 0 35px rgba(255, 255, 255, 0.15);
+  transform: rotateY(180deg);
+}
+/* ^^^^^^^^^^ THIS SECTION IS MODIFIED ^^^^^^^^^^ */
+
 
 .card-front::before,
 .card-back::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%);
-  transform: scale(0);
-  transition: transform 0.6s ease-out;
+  display: none;
 }
 
-.card:hover .card-front::before,
-.card:hover .card-back::before {
-  transform: scale(1);
-}
 
-.card-front {
-  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
-}
+/* === สไตล์ Text (แยกหน้า Front / Back) === */
 
-.card-back {
-  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-  transform: rotateY(180deg);
-}
-
+/* โครงสร้าง Text ที่ใช้ร่วมกัน */
 .card-label {
   position: absolute;
   top: 25px;
@@ -224,15 +208,10 @@
   transform: translateX(-50%);
   font-size: 12px;
   font-weight: 600;
-  color: white;
   text-transform: uppercase;
   letter-spacing: 3px;
   padding: 8px 24px;
-  background: rgba(255,255,255,0.2);
   border-radius: 20px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
 }
 
 .card-content {
@@ -245,9 +224,7 @@
   font-size: 22px;
   line-height: 1.7;
   margin: 0;
-  color: white;
   font-weight: 500;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .card-hint {
@@ -256,17 +233,53 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 12px;
-  color: rgba(255,255,255,0.8);
   opacity: 0.9;
   transition: opacity 0.3s;
   letter-spacing: 0.5px;
 }
 
+/* vvvvvvvvvv THIS SECTION IS MODIFIED vvvvvvvvvv */
+/* 4. สี Text หน้าคำถาม (สีเข้ม) */
+.card-front .card-label {
+  color: #475569;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.card-front .card-content p {
+  color: #1f2937; /* สี Navy เข้ม */
+  text-shadow: none;
+}
+
+.card-front .card-hint {
+  color: #64748b; /* สีเทาเข้ม */
+}
+
+/* 5. สี Text หน้าคำตอบ (สีอ่อน) */
+.card-back .card-label {
+  color: #E0E0E0;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-back .card-content p {
+  color: #E0E0E0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-back .card-hint {
+  color: rgba(224, 224, 224, 0.7);
+}
+/* ^^^^^^^^^^ THIS SECTION IS MODIFIED ^^^^^^^^^^ */
+
+
 .card:hover .card-hint {
   opacity: 1;
 }
 
-/* Controls */
+/* === 5. Control Buttons (Gradient White) === */
 .card-controls {
   display: flex;
   justify-content: center;
@@ -277,21 +290,48 @@
 }
 
 .btn-nav, .btn-flip, .btn-generate, .btn-secondary, .btn-regenerate {
-  padding: 14px 32px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
+  background: radial-gradient(circle, #ffffff 60%, #e0e0e0 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 12px 28px;
+  color: #0B1D39;
   font-weight: 600;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  
+  font-size: 16px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  flex: 1;
+  justify-content: center;
+  
+  animation: pulse-button 3s infinite ease-in-out;
+}
+
+.btn-nav:hover, .btn-flip:hover, .btn-generate:hover, .btn-secondary:hover, .btn-regenerate:hover {
+  animation-name: none;
+  box-shadow: 0 6px 30px rgba(255, 255, 255, 0.45);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.btn-nav:hover:not(:disabled),
+.btn-flip:hover:not(:disabled),
+.btn-generate:hover:not(:disabled),
+.btn-secondary:hover,
+.btn-regenerate:hover:not(:disabled) {
+  animation-name: none;
+  box-shadow: 0 6px 30px rgba(255, 255, 255, 0.45);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.btn-nav:active:not(:disabled),
+.btn-flip:active:not(:disabled) {
+  animation-name: none;
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
 }
 
 .btn-nav::before,
@@ -299,111 +339,45 @@
 .btn-generate::before,
 .btn-secondary::before,
 .btn-regenerate::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
-}
-
-.btn-nav:hover::before,
-.btn-flip:hover::before,
-.btn-generate:hover:not(:disabled)::before,
-.btn-secondary:hover::before,
-.btn-regenerate:hover:not(:disabled)::before {
-  width: 300px;
-  height: 300px;
-}
-
-.btn-nav {
-  background: #1e40af;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-nav:hover:not(:disabled) {
-  background: #1d4ed8;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
-}
-
-.btn-nav:active:not(:disabled) {
-  transform: translateY(-1px);
+  display: none;
 }
 
 .btn-nav:disabled {
-  background: #bdc3c7;
-  color: #7f8c8d;
+  background: rgba(255, 255, 255, 0.1);
+  color: #9e9e9e;
   cursor: not-allowed;
   opacity: 0.6;
   box-shadow: none;
-  border-color: #bdc3c7;
-}
-
-.btn-flip {
-  background: #1e40af;
-  color: white;
-  padding: 14px 40px;
-  font-size: 17px;
-  font-weight: 600;
-  border: 1px solid #1e40af;
-}
-
-.btn-flip:hover:not(:disabled) {
-  background: #1d4ed8;
-  transform: translateY(-3px) scale(1.05);
-  box-shadow: 0 8px 25px rgba(30, 64, 175, 0.3);
-}
-
-.btn-flip:active:not(:disabled) {
-  transform: translateY(-1px) scale(1.02);
-}
-
-.btn-generate, .btn-regenerate {
-  background: #1e40af;
-  color: white;
-  font-weight: 600;
-}
-
-.btn-generate:hover:not(:disabled), 
-.btn-regenerate:hover:not(:disabled) {
-  background: #1d4ed8;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(30, 64, 175, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  animation: none;
 }
 
 .btn-secondary {
-  background: #95a5a6;
-  color: white;
-  font-weight: 600;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+  color: #ffffff;
 }
-
 .btn-secondary:hover {
-  background: #7f8c8d;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(127, 140, 141, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 25px rgba(255, 255, 255, 0.2);
 }
 
-/* Keyboard Hint */
+
+/* === 6. Other Elements === */
 .keyboard-hint {
   text-align: center;
   font-size: 13px;
-  color: #7f8c8d;
+  color: #E0E0E0;
   margin: 25px 0;
   padding: 12px 20px;
-  background: #f8f9fa;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 10px;
   animation: fadeIn 0.6s ease-out 0.5s both;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   letter-spacing: 0.3px;
 }
 
-/* Action Controls */
 .action-controls {
   display: flex;
   justify-content: center;
@@ -411,56 +385,30 @@
   animation: fadeIn 0.6s ease-out 0.6s both;
 }
 
-/* Loading State */
-.loading-spinner {
-  text-align: center;
-  padding: 80px 20px;
-  animation: fadeIn 0.4s ease-out;
-}
-
-.spinner {
-  width: 60px;
-  height: 60px;
-  margin: 0 auto 30px;
-  border: 4px solid #ecf0f1;
-  border-top: 4px solid #1e40af;
-  border-radius: 50%;
-  animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-spinner p {
-  font-size: 18px;
-  color: #1e40af;
-  font-weight: 500;
-}
-
 /* Error State */
 .error-box {
   text-align: center;
   padding: 50px;
-  background: rgba(220, 53, 69, 0.1);
+  
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  background: rgba(255, 82, 82, 0.15);
   border-radius: 20px;
   margin: 20px 0;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  box-shadow: 0 0 25px rgba(255, 82, 82, 0.3);
   animation: fadeInScale 0.5s ease-out;
-  border: 1px solid rgba(220, 53, 69, 0.3);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 82, 82, 0.3);
 }
 
 .error-box h2 {
-  color: #ff6b6b;
+  color: #ff8a80;
   margin-bottom: 15px;
   font-size: 26px;
 }
 
 .error-box p {
-  color: #1e40af;
+  color: #E0E0E0;
   margin-bottom: 30px;
   font-size: 16px;
 }
@@ -482,14 +430,14 @@
 .empty-state h1 {
   margin-bottom: 20px;
   font-size: 36px;
-  color: #e8e8e8;
+  color: rgba(224, 224, 224, 0.5);
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .empty-state p {
   font-size: 18px;
-  color: #7f8c8d;
+  color: rgba(224, 224, 224, 0.7);
   margin-bottom: 40px;
 }
 
@@ -497,104 +445,55 @@
   margin: 10px;
 }
 
+/* vvvvvvvvvv NEW KEYFRAMES ADDED vvvvvvvvvv */
+@keyframes shimmer-text {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulse-button {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(255, 255, 255, 0.35);
+  }
+}
+/* ^^^^^^^^^^ NEW KEYFRAMES ADDED ^^^^^^^^^^ */
+
 /* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .flashcard-container {
-    padding: 15px;
-  }
-
-  .flashcard-header h1 {
-    font-size: 28px;
-  }
-
-  .card {
-    height: 320px;
-  }
-
-  .card-content {
-    padding: 60px 35px 40px;
-  }
-
-  .card-content p {
-    font-size: 19px;
-  }
-
-  .card-controls {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .btn-nav, .btn-flip {
-    padding: 12px 24px;
-    font-size: 15px;
-  }
-
-  .btn-text {
-    display: none;
-  }
-
-  .keyboard-hint {
-    display: none;
-  }
-
-  .spacer {
-    width: 60px;
-  }
+  .flashcard-container { padding: 15px; }
+  .flashcard-header h1 { font-size: 28px; }
+  .card { height: 320px; }
+  .card-content { padding: 60px 35px 40px; }
+  .card-content p { font-size: 19px; }
+  .card-controls { flex-wrap: wrap; gap: 12px; }
+  .btn-nav, .btn-flip { padding: 12px 24px; font-size: 15px; }
+  .btn-text { display: none; }
+  .keyboard-hint { display: none; }
+  .spacer { width: 60px; }
 }
-
 @media (max-width: 480px) {
-  .card {
-    height: 280px;
-  }
-
-  .card-content p {
-    font-size: 17px;
-  }
-  
-  .flashcard-header h1 {
-    font-size: 24px;
-  }
+  .card { height: 280px; }
+  .card-content p { font-size: 17px; }
+  .flashcard-header h1 { font-size: 24px; }
 }

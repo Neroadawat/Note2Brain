@@ -1,5 +1,6 @@
 /* ==============================================
-   Modern Tech Theme for Full Context Page
+   Modern Tech Theme (ปรับปรุงเป็น Navy & White)
+   (แก้ไข: ยกเลิก scroll ภายในกล่อง)
    ============================================== */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
@@ -11,7 +12,6 @@
   --card-bg: rgba(30, 64, 175, 0.1);
   --card-border: rgba(56, 189, 248, 0.2);
   
-  /* ✨ NEW: Defined a clear white-ish color for main text */
   --white-text: #e0e6f1; 
 }
 
@@ -22,19 +22,27 @@
 
 .context-container {
   min-height: 100vh;
-  background-color: var(--deep-blue);
+  background: transparent;
   color: var(--light-slate);
   padding: 40px;
   animation: fadeInPage 0.5s ease-out;
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.context-container::before {
+  display: none;
 }
 
 .context-header {
   display: flex;
   justify-content: space-between;
+  flex-direction: row-reverse;
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--card-border);
+  border-bottom: 1px solid rgba(204, 214, 246, 0.1);
 }
 
 .context-title {
@@ -42,51 +50,141 @@
   font-weight: 700;
   margin: 0;
   color: var(--white); 
+  text-shadow: 0 2px 15px rgba(255, 255, 255, 0.2);
+  flex: 1;
+  text-align: left; /* [แก้ไข] จัดชิดซ้าย */
 }
 
 .context-back-btn {
+  background: linear-gradient(90deg, #e0e0e0 0%, #ffffff 100%);
+  border: none;
+  border-radius: 999px;
+  padding: 10px 24px;
+  color: #0B1D39;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--light-slate);
-  border: 1px solid var(--card-border);
-  font-weight: 500;
   font-size: 14px;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .context-back-btn:hover {
-  background: var(--card-bg);
-  border-color: var(--light-slate);
+  box-shadow: 0 4px 25px rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+  background: linear-gradient(90deg, #e0e0e0 0%, #ffffff 100%);
+  border-color: transparent;
 }
 
 .context-main {
-  max-width: 900px;
+  max-width: 100%;
   margin: 0 auto;
+  padding-bottom: 40px; /* [เพิ่ม] เพิ่มระยะห่างด้านล่างสุดของหน้า */
 }
 
+/* vvvvvvvvvv THIS SECTION IS MODIFIED vvvvvvvvvv */
 .context-content-box {
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: 16px;
-  padding: 30px;
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1), 0 0 35px rgba(255, 255, 255, 0.15);
+  
+  border-radius: 20px;
+  padding: 40px;
+  transition: all 0.3s ease;
+  
+  /* [ลบ] overflow-y: auto; */
+  /* [ลบ] height: calc(100vh - 180px); */
+  
+  /* [เพิ่ม] ให้มี min-height เพื่อให้กล่องสวยงามแม้ไม่มีข้อความ */
+  min-height: 300px; 
+}
+/* ^^^^^^^^^^ THIS SECTION IS MODIFIED ^^^^^^^^^^ */
+
+.context-content-box:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .context-text {
   white-space: pre-wrap;
   word-wrap: break-word;
   font-family: 'Inter', sans-serif;
-  
-  /* ✅ MODIFIED: Enhanced readability */
-  font-size: 17px;           /* Slightly larger text */
-  line-height: 1.8;          /* Increased line spacing for better flow */
-  color: var(--white-text);  /* Brighter, more readable text color */
-  font-weight: 400;          /* Ensure good weight for readability */
-  
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--white-text);
+  font-weight: 400;
   margin: 0;
+  
+  text-align: justify;
+  letter-spacing: 0.3px;
+}
+
+.context-text p {
+  margin-bottom: 1.5rem;
+  text-indent: 2em;
+}
+
+.context-text h1, 
+.context-text h2, 
+.context-text h3, 
+.context-text h4 {
+  color: var(--white);
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.context-text ul, 
+.context-text ol {
+  padding-left: 2rem;
+  margin: 1rem 0;
+}
+
+.context-text ul li,
+.context-text ol li {
+  margin-bottom: 0.5rem;
+  padding-left: 0.5rem;
+}
+
+.context-text blockquote {
+  border-left: 3px solid var(--light-slate);
+  margin: 1.5rem 0;
+  padding-left: 1.5rem;
+  font-style: italic;
+  color: var(--slate-gray);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .context-container {
+    padding: 20px;
+  }
+  
+  .context-header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .context-title {
+    text-align: left;
+  }
+
+  .context-content-box {
+    padding: 25px;
+    /* [ลบ] height: calc(100vh - 220px); */
+  }
+  
+  .context-text {
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  
+  .context-text p {
+    margin-bottom: 1.2rem;
+  }
 }

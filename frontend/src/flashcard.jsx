@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { FileText } from 'lucide-react';
 import './flashcard.css';
+import './Document.css';
 
 export default function Flashcard() {
   const { id } = useParams();
@@ -18,7 +20,6 @@ export default function Flashcard() {
   const [direction, setDirection] = useState('');
   const [isTransitioning, setIsTransitioning] = useState(false);
   
-  // ใช้ useRef แทน useState สำหรับ hasGenerated
   const hasGeneratedRef = useRef(false);
   const isInitializingRef = useRef(false);
 
@@ -27,7 +28,6 @@ export default function Flashcard() {
       return;
     }
 
-    // ย้าย hasGeneratedRef.current = true ไปไว้หลัง API สำเร็จ
     isInitializingRef.current = true;
     setLoading(true);
     setError('');
@@ -53,10 +53,8 @@ export default function Flashcard() {
       setCurrentCard(0);
       setIsFlipped(false);
       
-      // ตั้ง hasGenerated เป็น true หลังสำเร็จเท่านั้น
       hasGeneratedRef.current = true;
       
-      // delay เพื่อให้ state stable
       setTimeout(() => {
         isInitializingRef.current = false;
       }, 200);
@@ -71,7 +69,6 @@ export default function Flashcard() {
     }
   };
 
-  // ใช้ useEffect แบบ simple ไม่มี dependencies ซับซ้อน
   useEffect(() => {
     if (id) {
       generateFlashcards();
@@ -183,10 +180,15 @@ export default function Flashcard() {
 
   if (loading || isInitializingRef.current) {
     return (
-      <div className="flashcard-container page-transition">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Generating flashcards...</p>
+      <div className="generating-overlay">
+        <div className="generating-container">
+          <div className="generating-spinner">
+            <FileText size={50} className="spinner-icon" />
+          </div>
+          <h2 className="generating-text">Generating Flashcards</h2>
+          <p className="generating-subtext">
+            Crafting your study cards. This may take a moment...
+          </p>
         </div>
       </div>
     );
@@ -249,9 +251,10 @@ export default function Flashcard() {
         </button>
         <div>
           <h1>Flashcard</h1>
-          <p className="flashcard-settings">
+          {/* <p className="flashcard-settings">
             {numQuestions} Questions
-          </p>
+          </p> 
+          */} {/* <--- ผมลบส่วนนี้ออกให้แล้วครับ */}
         </div>
         <div className="spacer"></div>
       </div>

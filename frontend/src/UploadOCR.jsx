@@ -55,6 +55,21 @@ export default function UploadOCR() {
     }
   };
 
+  // Add new function to split text into lines
+  const renderAnimatedText = (text) => {
+    return text.split('\n').map((line, index) => (
+      <div
+        key={index}
+        className="summary-line"
+        style={{
+          animationDelay: `${index * 0.1}s`
+        }}
+      >
+        {line.trim() || '\u00A0'}
+      </div>
+    ));
+  };
+
   return (
     <div className="upload-container page-transition">
       <div className="upload-card">
@@ -98,9 +113,9 @@ export default function UploadOCR() {
             <div className="summary-section">
               <h2 className="summary-title">Summary:</h2>
               <div className="summary-content">
-                <p className="summary-text">
-                  {result.summary}
-                </p>
+                <div className="summary-text">
+                  {renderAnimatedText(result.summary)}
+                </div>
               </div>
             </div>
           </div>

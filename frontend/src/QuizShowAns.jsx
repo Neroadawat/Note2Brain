@@ -86,20 +86,32 @@ export default function QuizShowAns() {
   const handlePrev = () => {
     if (currentQuestionIdx > 0 && !isTransitioning) {
       setIsTransitioning(true);
+      const card = document.querySelector('.quiz-question-card');
+      card.classList.add('transitioning');
+      
       setTimeout(() => {
         setCurrentQuestionIdx(idx => idx - 1);
-        setIsTransitioning(false);
-      }, 200);
+        setTimeout(() => {
+          card.classList.remove('transitioning');
+          setIsTransitioning(false);
+        }, 300);
+      }, 300);
     }
   };
   const handleNext = () => {
     if (!resultData?.questions) return;
     if (currentQuestionIdx < resultData.questions.length - 1 && !isTransitioning) {
       setIsTransitioning(true);
+      const card = document.querySelector('.quiz-question-card');
+      card.classList.add('transitioning');
+      
       setTimeout(() => {
         setCurrentQuestionIdx(idx => idx + 1);
-        setIsTransitioning(false);
-      }, 200);
+        setTimeout(() => {
+          card.classList.remove('transitioning');
+          setIsTransitioning(false);
+        }, 300);
+      }, 300);
     }
   };
 

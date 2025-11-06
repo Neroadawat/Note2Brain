@@ -111,6 +111,12 @@ export default function QuizHistory() {
     return { text: 'F', color: '#dc2626' };
   };
 
+  const getScoreBadgeClass = (percentage) => {
+    if (percentage === 100) return 'perfect';
+    if (percentage < 50) return 'failed';
+    return 'passing';
+  };
+
   if (quizHistory.length === 0) {
     return (
       <div className="history-container">
@@ -156,7 +162,9 @@ export default function QuizHistory() {
                   <h3 className="history-doc-name">{item.quiz.document.filename}</h3>
                   <p className="history-date">{new Date(item.completedAt).toLocaleString()}</p>
                 </div>
-                <div className="history-score-badge">{percentage}%</div>
+                <div className={`history-score-badge ${getScoreBadgeClass(percentage)}`}>
+                  {percentage}%
+                </div>
               </div>
               <div className="history-card-body">
                 <div className="history-stat-row">

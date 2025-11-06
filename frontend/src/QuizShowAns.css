@@ -56,9 +56,86 @@
   color: white;
 }
 
-/* Responsive */
+/* Add fade-in animation */
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quiz-section {
+  animation: fadeSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quiz-question-card {
+  opacity: 0;
+  animation: fadeSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.2s;
+}
+
+/* Add staggered animations for options */
+.quiz-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.quiz-option-label {
+  opacity: 0;
+  animation: fadeSlideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.quiz-option-label:nth-child(1) { animation-delay: 0.3s; }
+.quiz-option-label:nth-child(2) { animation-delay: 0.4s; }
+.quiz-option-label:nth-child(3) { animation-delay: 0.5s; }
+.quiz-option-label:nth-child(4) { animation-delay: 0.6s; }
+
+/* Smooth transition for navigation */
+.quiz-question-box {
+  transition: opacity 0.3s ease;
+}
+
+.transitioning .quiz-question-box {
+  opacity: 0;
+}
+
+/* Add animation for navigation buttons */
+.quiz-nav-btn {
+  transition: all 0.3s ease;
+  opacity: 0;
+  animation: fadeSlideIn 0.4s ease forwards;
+}
+
+.quiz-nav-prev { animation-delay: 0.7s; }
+.quiz-nav-next { animation-delay: 0.8s; }
+
+/* Add animation for counter */
+.quiz-counter {
+  opacity: 0;
+  animation: fadeSlideIn 0.4s ease forwards;
+  animation-delay: 0.6s;
+}
+
+/* Update existing transition styles */
+.quiz-question-card.transitioning {
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+/* Enhance responsive design */
 @media (max-width: 768px) {
-  .quiz-showans-options {
+  .quiz-options {
     grid-template-columns: 1fr;
+  }
+  
+  .quiz-option-label {
+    animation-duration: 0.4s;
   }
 }

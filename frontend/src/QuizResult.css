@@ -27,6 +27,163 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
+/* Add new animations */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes countUp {
+  from {
+    transform: translateY(1rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* เพิ่ม keyframes สำหรับ effects พิเศษ */
+@keyframes rainbow {
+  0% { color: #ff0000; }
+  20% { color: #ffa500; }
+  40% { color: #ffff00; }
+  60% { color: #008000; }
+  80% { color: #0000ff; }
+  100% { color: #4b0082; }
+}
+
+@keyframes celebration {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes shine {
+  0% {
+    background-position: -100% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes confetti {
+  0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotateZ(720deg); opacity: 0; }
+}
+
+/* Add celebration animations */
+@keyframes perfect-score-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.3); }
+  60% { transform: scale(0.9); }
+  80% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+  100% { transform: translateY(0); }
+}
+
+/* สไตล์สำหรับคะแนนเต็ม */
+.perfect-score-container {
+  position: relative;
+  animation: float 3s ease-in-out infinite;
+}
+
+.perfect-score {
+  position: relative;
+  background: linear-gradient(
+    90deg,
+    #ff0000 0%,
+    #ffa500 20%,
+    #ffff00 40%,
+    #008000 60%,
+    #0000ff 80%,
+    #4b0082 100%
+  );
+  background-size: 200% auto;
+  color: transparent !important;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: 
+    perfect-score-pop 1s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    shine 5s linear infinite;
+}
+
+/* Add sparkles around perfect score */
+.perfect-score::before,
+.perfect-score::after {
+  content: '✨';
+  position: absolute;
+  font-size: 24px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.perfect-score::before {
+  left: -30px;
+  top: 0;
+  animation-delay: 0.5s;
+}
+
+.perfect-score::after {
+  right: -30px;
+  top: 0;
+  animation-delay: 1s;
+}
+
+/* สไตล์สำหรับ confetti */
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.confetti::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-blue);
+  transform: rotate(45deg);
+}
+
+.confetti-piece {
+  position: fixed;
+  width: 10px;
+  height: 20px;
+  background: #ffd700;
+  top: -20px;
+  opacity: 0;
+}
+
+@keyframes confetti-fall {
+  0% { 
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% { 
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
 .result-page-container {
   display: flex;
   justify-content: center;
@@ -105,7 +262,22 @@
 .score-value-tech {
   font-size: 56px;
   font-weight: 700;
-  color: var(--primary-blue) !important; /* ✨ MODIFIED: Changed to primary blue and added !important to override inline styles */
+  color: var(--primary-blue);
+  opacity: 0;
+  transform: translateY(15px);
+  animation: smoothCountUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation-delay: 2.6s;
+}
+
+@keyframes smoothCountUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .score-label-tech {
@@ -114,6 +286,9 @@
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 1px;
+  opacity: 0;
+  animation: slideUpFade 0.5s ease forwards;
+  animation-delay: 2.8s;
 }
 
 .stats-grid-tech {
@@ -137,57 +312,209 @@
   font-size: 24px;
   font-weight: 600;
   color: var(--text-dark);
+  opacity: 0;
+  transform: translateY(10px);
+  animation: smoothCountUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes smoothCountUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ปรับ animation delays */
+.stat-value-tech.total {
+  animation-delay: 0.2s;
+}
+
+.stat-value-tech.incorrect {
+  animation-delay: 1s;
+}
+
+.stat-value-tech.correct {
+  animation-delay: 1.8s;
 }
 
 .stat-label-tech {
   font-size: 12px;
   color: var(--text-light);
   text-transform: uppercase;
+  opacity: 0;
+  animation: slideUpFade 0.5s ease forwards;
+}
+
+.stat-label-tech.total {
+  animation-delay: 0.4s;
+}
+
+.stat-label-tech.incorrect {
+  animation-delay: 1.2s;
+}
+
+.stat-label-tech.correct {
+  animation-delay: 2s;
 }
 
 .result-actions-tech {
   display: flex;
-  gap: 12px;
-  margin-top: 20px;
+  flex-direction: row;
+  gap: 15px;  /* ลดช่องว่างระหว่างปุ่ม */
+  margin-top: 30px;
+  width: 100%;
+  justify-content: center;
+  padding: 0;  /* ลบ padding ออก */
 }
 
 .result-btn-tech {
   flex: 1;
-  padding: 14px 20px;
-  border-radius: 8px;
+  min-width: 140px;  /* ลดความกว้างขั้นต่ำ */
+  padding: 14px 20px;  /* ลด padding */
+  border-radius: 12px;  /* ลด border radius */
   font-weight: 600;
-  font-size: 14px;
+  font-size: 14px;  /* ลดขนาดตัวอักษร */
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 8px;  /* ลดช่องว่างระหว่างไอคอนกับข้อความ */
+  position: relative;
+  overflow: hidden;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
 }
 
+/* ปรับขนาดไอคอน */
+.result-btn-tech svg,
+.result-btn-tech i {
+  font-size: 20px;  /* ลดขนาดไอคอน */
+  width: 24px;    /* ลดความกว้าง */
+  height: 24px;   /* ลดความสูง */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 2;
+}
+
+/* ปรับ hover effect */
 .result-btn-tech:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.01);  /* ลดการเคลื่อนไหว */
 }
 
-/* --- ✨ Lighter Button Style --- */
+.result-btn-tech:hover svg,
+.result-btn-tech:hover i {
+  transform: scale(1.1) rotate(-3deg);  /* ลดการหมุนและขยาย */
+}
+
+/* Primary Button Style */
 .result-btn-primary-tech {
-  background: var(--primary-blue); /* MODIFIED: Lighter blue background */
-  color: var(--white);
-  border: 1px solid var(--primary-blue);
-}
-.result-btn-primary-tech:hover {
-  background: #60a5fa; /* A slightly lighter blue for hover */
-  border-color: #60a5fa;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);  /* ลด shadow */
 }
 
+.result-btn-primary-tech:hover {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);  /* ลด shadow เมื่อ hover */
+}
+
+/* Secondary Button Style */
 .result-btn-secondary-tech {
-  background: transparent;
-  color: var(--text-medium);
-  border: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  color: var(--text-dark);
+  border: 2px solid #e2e8f0;
 }
 
 .result-btn-secondary-tech:hover {
-  border-color: var(--text-medium);
-  background: #f8fafc;
+  border-color: #3b82f6;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  color: #3b82f6;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Outline Button Style */
+.result-btn-outline-tech {
+  background: transparent;
+  color: #3b82f6;
+  border: 2px solid #3b82f6;
+  box-shadow: inset 0 0 0 0 #3b82f6;
+  transition: all 0.4s ease;
+}
+
+.result-btn-outline-tech:hover {
+  box-shadow: inset 280px 0 0 0 #3b82f6;
+  color: white;
+  transform: translateY(-3px) scale(1.02);
+}
+
+/* Add shimmer effect to primary button */
+.result-btn-primary-tech::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: all 0.8s;
+  opacity: 0;
+}
+
+.result-btn-primary-tech:hover::after {
+  opacity: 1;
+}
+
+/* Add responsive styles for mobile */
+@media (max-width: 640px) {
+  .result-actions-tech {
+    flex-direction: column;
+  }
+
+  .result-btn-tech {
+    width: 100%;
+  }
+
+  .result-btn-tech svg,
+  .result-btn-tech i {
+    font-size: 22px;  /* Slightly smaller on mobile */
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 768px) {
+  .result-actions-tech {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-btn-tech {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 13px;
+  }
+
+  .result-btn-tech svg,
+  .result-btn-tech i {
+    font-size: 18px;
+    width: 22px;
+    height: 22px;
+  }
 }

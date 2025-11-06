@@ -3,18 +3,21 @@ import './QuizGenerate.css';
 
 export default function QuizGenerate({ isOpen, onClose, onCreateQuiz, documentName }) {
   const [difficulty, setDifficulty] = useState('Easy');
-  // ✨ ตั้งค่าเริ่มต้นให้เป็น 1 หรือค่าอื่นที่เหมาะสม
-  const [numQuestions, setNumQuestions] = useState(10); 
+  const [numQuestions, setNumQuestions] = useState(10);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
-  const handleCreateClick = () => {
-    // ตรวจสอบอีกครั้งว่าค่าไม่ต่ำกว่า 1 ก่อนส่ง
+  const handleCreateClick = async () => {
+    setIsGenerating(true);
     const finalNumQuestions = Math.max(1, Number(numQuestions));
-    onCreateQuiz({ difficulty, numQuestions: finalNumQuestions });
-    onClose();
+    
+    try {
+      await onCreateQuiz({ difficulty, numQuestions: finalNumQuestions });
+    } finally {
+      setIsGenerating(false);
+      onClose();
+    }
   };
 
   const handleNumChange = (e) => {
@@ -23,6 +26,23 @@ export default function QuizGenerate({ isOpen, onClose, onCreateQuiz, documentNa
     setNumQuestions(value === '' ? '' : Number(value));
   };
 
+  if (isGenerating) {
+    return (
+      <div className="quiz-loading-overlay">
+        <div className="quiz-loading-container">
+          <div className="loading-icon"></div>
+          <h2 className="loading-text">Generating Quiz</h2>
+          <p className="loading-subtext">
+            Creating {numQuestions} {difficulty.toLowerCase()} questions 
+            for {documentName}...
+          </p>
+          <div className="loading-progress">
+            <div className="progress-bar"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="quiz-modal-overlay" onClick={onClose}>
