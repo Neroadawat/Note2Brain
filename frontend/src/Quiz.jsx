@@ -1,79 +1,50 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate, useLocation } from "react-router-dom"; // ✨ [แก้ไข] ลบ useLocation ที่ไม่ใช้ออก
-import "./Document.css"; // ตรวจสอบว่าจำเป็นต้องใช้ CSS นี้หรือไม่
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import "./Document.css";
 import "./Quiz.css";
 
 export default function Quiz() {
-  // ✨ [แก้ไข] รับ quizId จาก URL Parameter แทน id เดิม
   const { quizId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [quizData, setQuizData] = useState(null); // เปลี่ยนชื่อ state เพื่อความชัดเจน
+  const [quizData, setQuizData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState({}); // state เก็บคำตอบ { questionId: 'A' }
+  const [selectedAnswers, setSelectedAnswers] = useState({});
   const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
-    // ✨ [เพิ่ม] Console Log เพื่อเช็ค userId ตอนเริ่มโหลดหน้า Quiz
-    console.log("UserID ON Quiz mount:", localStorage.getItem("userId"));
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      // ✨ [เพิ่ม] Console Error ก่อน Redirect
-      console.error("User not logged in, redirecting...");
-      navigate("/login");
-      return;
-    }
-
     const fetchQuizData = async () => {
       const userId = localStorage.getItem("userId");
-      const isRetry = location.state?.isRetry || false; // ตรวจสอบว่าเป็นการ Retry หรือไม่
-      const mockData = {
-        documentName: "Fallback Document",
-        questions: [
-          { id: "mock1", question: "Mock Question 1?", optionA: "A1", optionB: "B1", optionC: "C1", optionD: "D1", correctAnswer: "A" },
-          { id: "mock2", question: "Mock Question 2?", optionA: "A2", optionB: "B2", optionC: "C2", optionD: "D2", correctAnswer: "B" }
-        ]
-       };
-      const endpoint = isRetry
-        ? `http://localhost:8000/quiz/${quizId}/retry?user_id=${userId}`
-        : `http://localhost:8000/quiz/${quizId}?user_id=${userId}`;
+      if (!userId) {
+        navigate("/login");
+        return;
+      }
 
       try {
-        const res = await fetch(endpoint);
-        if (!res.ok) {
-          const errorData = await res.json().catch(() => ({ detail: "Quiz not found or access denied." }));
-          throw new Error(errorData.detail || `HTTP error! status: ${res.status}`);
-        }
-        const result = await res.json();
-
-        if (result.success && result.data && result.data.questions && result.data.questions.length > 0) {
+        const response = await fetch(`http://localhost:8000/quiz/${quizId}?user_id=${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch quiz');
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
           setQuizData({
             documentName: result.data.document?.filename || "Quiz",
+            documentId: result.data.document?.id,
             questions: result.data.questions
           });
-        } else {
-          console.warn("Received empty or invalid quiz data from API, using mock data.", result);
-          setQuizData(mockData);
         }
-      } catch (err) {
-        console.error("Error fetching quiz data, using mock data:", err);
-        setQuizData(mockData);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        navigate("/home");
       } finally {
         setLoading(false);
       }
     };
 
-    if (quizId) {
-      fetchQuizData();
-    } else {
-      setLoading(false);
-      console.error("No Quiz ID provided in URL");
-      setQuizData(null);
-    }
-  }, [quizId, navigate, location.state]);
+    fetchQuizData();
+  }, [quizId, navigate]);
 
-  // ✨ เก็บคำตอบโดยใช้ question.id เป็น key
   const handleAnswerChange = (answerKey, questionId) => {
     setSelectedAnswers(prev => ({ ...prev, [questionId]: answerKey }));
   };
@@ -98,7 +69,6 @@ export default function Quiz() {
     }
   };
 
-  // ✨ ฟังก์ชัน handleSubmit ให้เรียก API /submit-quiz
   const handleSubmit = async () => {
     const userId = localStorage.getItem("userId");
     if (!userId || !quizId || !quizData) return;
@@ -136,7 +106,7 @@ export default function Quiz() {
             totalQuestions: submissionResult.total,
             answeredCount: answeredCountSubmit,
             documentName: quizData.documentName,
-            results: submissionResult.results,
+            documentId: quizData.documentId,
           },
         });
       } else {

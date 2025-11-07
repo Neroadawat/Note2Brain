@@ -18,10 +18,18 @@
   gap: 8px;
 }
 
+/* --- นี่คือส่วนที่แก้ไข --- */
 .summary-title::before {
-  content: '📝';
-  font-size: 1.5rem;
+  /* [แก้ไข] เปลี่ยนจาก Emoji เป็น SVG icon 'file-text' */
+  content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234b5563' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'%3e%3c/path%3e%3cpolyline points='14 2 14 8 20 8'%3e%3c/polyline%3e%3cline x1='16' y1='13' x2='8' y2='13'%3e%3c/line%3e%3cline x1='16' y1='17' x2='8' y2='17'%3e%3c/line%3e%3cpolyline points='10 9 9 9 8 9'%3e%3c/polyline%3e%3c/svg%3e");
+  
+  /* [เพิ่ม] กำหนดขนาดและตำแหน่ง SVG */
+  width: 1.4rem;
+  height: 1.4rem;
+  display: inline-block; 
+  transform: translateY(2px); /* จัดให้อยู่กึ่งกลางกับ Text */
 }
+/* --- จบส่วนที่แก้ไข --- */
 
 .summary-content {
   background: linear-gradient(to bottom, #ffffff, #f8fafc);

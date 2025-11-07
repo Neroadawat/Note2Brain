@@ -77,14 +77,13 @@ export default function QuizHistory() {
     }
   };
 
-  const handleRetryQuiz = (quizId) => {
-    const userId = localStorage.getItem("userId");
-    if (!userId) {
-      alert("You need to log in to retry the quiz.");
-      navigate("/login");
-      return;
-    }
-    navigate(`/quiz/${quizId}`, { state: { isRetry: true } });
+  const handleRetryQuiz = (quizId, documentId) => {  // เพิ่ม documentId parameter
+    navigate(`/quiz/${quizId}`, {
+      state: { 
+        isRetry: true,
+        documentId: documentId  // เพิ่ม documentId ใน state
+      }
+    });
   };
 
   const handleViewResult = (quizItem) => {
@@ -195,7 +194,10 @@ export default function QuizHistory() {
                 <button className="history-action-btn view-btn" onClick={() => handleViewResult(item)}>
                   <View size={16} /> View
                 </button>
-                <button className="history-action-btn retry-btn" onClick={() => handleRetryQuiz(item.quizId)}>
+                <button 
+                  className="retry-btn history-action-btn"
+                  onClick={() => handleRetryQuiz(item.quizId, item.quiz.document.id)}  // ส่ง documentId ด้วย
+                >
                   <RotateCw size={16} /> Retry
                 </button>
                 <button className="history-action-btn delete-btn" onClick={() => handleDeleteItem(item.id)}>
