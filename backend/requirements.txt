@@ -5,5 +5,5 @@ requests
 openai
 bcrypt
 PyPDF2
-prisma-client
+prisma-client-py
 prisma
